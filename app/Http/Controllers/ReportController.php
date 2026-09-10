@@ -169,6 +169,25 @@ class ReportController extends Controller
             ->with('success', 'Laporan dihapus.');
     }
 
+    public function export(Request $request)
+    {
+        $community = $this->community($request);
+        $filters = $request->only(['month', 'year', 'category_id', 'q']);
+
+        $filename = sprintf(
+            'laporan-%s-%s.xlsx',
+            $community->value,
+            ! empty($filters['month']) && ! empty($filters['year'])
+                ? $filters['year'].'-'.str_pad((string) $filters['month'], 2, '0', STR_PAD_LEFT)
+                : date('Y-m-d')
+        );
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ReportExport($community, $filters),
+            $filename
+        );
+    }
+
     private function syncPhotos(Report $report, ?array $files): void
     {
         foreach ($files ?? [] as $file) {

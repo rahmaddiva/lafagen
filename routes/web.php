@@ -18,6 +18,8 @@ Route::prefix('{community}')
         Route::middleware('auth')->group(function () {
             Route::get('/', fn (\Illuminate\Http\Request $r) => redirect('/'.$r->route('community').'/dashboard'));
             Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+            Route::get('reports/export', [\App\Http\Controllers\ReportController::class, 'export'])
+                ->name('reports.export');
             Route::resource('reports', \App\Http\Controllers\ReportController::class);
 
             Route::middleware('admin')->group(function () {
