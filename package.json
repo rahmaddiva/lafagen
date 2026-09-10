@@ -16,7 +16,6 @@
         "laravel-vite-plugin": "^1.2.0",
         "lucide-vue-next": "^1.0.0",
         "postcss": "^8.4.47",
-        "recharts": "^3.10.1",
         "tailwind-merge": "^3.6.0",
         "tailwindcss": "^3.4.13",
         "tailwindcss-animate": "^1.0.7",
