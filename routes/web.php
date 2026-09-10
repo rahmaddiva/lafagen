@@ -18,5 +18,6 @@ Route::prefix('{community}')
         Route::middleware('auth')->group(function () {
             Route::get('/', fn (\Illuminate\Http\Request $r) => redirect('/'.$r->route('community').'/dashboard'));
             Route::view('dashboard', 'placeholder')->name('dashboard'); // diganti Task 6
+            Route::resource('reports', \App\Http\Controllers\ReportController::class);
         });
     });
