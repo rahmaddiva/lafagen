@@ -19,5 +19,10 @@ Route::prefix('{community}')
             Route::get('/', fn (\Illuminate\Http\Request $r) => redirect('/'.$r->route('community').'/dashboard'));
             Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
             Route::resource('reports', \App\Http\Controllers\ReportController::class);
+
+            Route::middleware('admin')->group(function () {
+                Route::resource('categories', \App\Http\Controllers\CategoryController::class)
+                    ->except(['create', 'show', 'edit']);
+            });
         });
     });
