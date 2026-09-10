@@ -45,6 +45,7 @@ komunitas masing-masing. Data kedua komunitas terisolasi penuh satu sama lain.
   `public/images/{fad,genre}.png` (user mengganti file = branding berubah, tanpa kode).
 - Tema diterapkan lewat atribut `data-community` pada `<html>` + blok CSS variables
   per komunitas; komponen shadcn-vue membaca variables ini sehingga otomatis berubah.
+- Gunakan Skill UI UX Pro Max, agar tidak AI Slop / AI Generic
 
 ## 5. Skema Data
 
