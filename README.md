@@ -1,66 +1,73 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lafagen
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem pelaporan program kerja (proker) dua komunitas di Kabupaten Tanah Laut:
+**FAD (Forum Anak Daerah)** dan **GENRE (Generasi Berencana)** — satu aplikasi,
+dua tema/area terpisah, data antar komunitas terisolasi.
 
-## About Laravel
+## Fitur
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Landing pemilihan komunitas, halaman login bertema (FAD hijau-teal, GENRE biru).
+- CRUD laporan proker: judul, kategori, tanggal mulai/selesai, lokasi, deskripsi,
+  unggah banyak foto dokumentasi (JPG/PNG/WEBP, maks 5 MB/foto, maks 10 foto).
+- Filter laporan per bulan/tahun/kategori + pencarian, paginasi 15/halaman.
+- Dashboard: total laporan, jumlah anggota, laporan bulan/tahun berjalan,
+  grafik batang per bulan, donut per kategori, 5 laporan terbaru, pemilih tahun.
+- Manajemen kategori dan pengguna (khusus admin komunitas).
+- Export Excel mengikuti filter yang aktif di halaman laporan.
+- Hak akses: `anggota` mengelola laporannya sendiri; `admin` mengelola seluruh
+  laporan, kategori, dan pengguna dalam komunitasnya.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Laravel 11 · PHP ≥ 8.2 (dikembangkan di 8.3) · Inertia.js v2 · Vue 3 · Vite ·
+Tailwind CSS 3.4 + shadcn-vue · MySQL 8 (dev) / SQLite in-memory (test) ·
+maatwebsite/excel 3.1 · PHPUnit.
 
-## Learning Laravel
+## Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```bash
+composer install
+copy .env.example .env      # Windows
+php artisan key:generate
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS lafagen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+# sesuaikan DB_DATABASE/DB_USERNAME/DB_PASSWORD di .env
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+php artisan migrate --seed
+php artisan storage:link     # agar foto di storage/app/public bisa diakses
+npm install
+npm run dev                  # atau: npm run build
+php artisan serve
+```
 
-## Laravel Sponsors
+### Kredensial seed
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Komunitas | Email | Password |
+|---|---|---|
+| FAD | `admin@lafagen.test` | `password` (atau `SEED_ADMIN_PASSWORD` di `.env`) |
+| GENRE | `admin-genre@lafagen.test` | idem |
 
-### Premium Partners
+Seeder juga membuat 6 kategori default per komunitas dan 20 laporan demo
+(12 FAD + 8 GENRE) agar dashboard langsung berisi grafik.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Aset brand
 
-## Contributing
+Logo komunitas memakai `public/images/fad.png` dan `public/images/genre.png`
+(saat ini placeholder 1×1). Ganti dua file itu dengan logo asli — tidak ada
+perubahan kode yang diperlukan. Nama/warna komunitas diatur di `config/communities.php`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Test
 
-## Code of Conduct
+```bash
+php artisan test          # 45 test: auth, isolasi komunitas, laporan, dashboard, kategori, pengguna, export
+npm run build             # verifikasi build frontend
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Catatan operasional
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Foto laporan tersimpan di `storage/app/public/reports/{komunitas}/{id}/`.
+  **Backup folder `storage/app/`** bersama database; `public/storage` hanya symlink.
+- Password user hanya bisa dibuat/di-reset oleh admin komunitas (tidak ada
+  registrasi publik maupun reset via email).
+- Isolasi komunitas dijaga dua lapis: prefix URL `/fad` & `/genre` (middleware
+  `EnsureCommunity`) dan kolom `community` pada setiap query data bisnis.
