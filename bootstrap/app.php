@@ -14,6 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+        $middleware->alias([
+            'community' => \App\Http\Middleware\EnsureCommunity::class,
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        ]);
+        $middleware->redirectGuestsTo(
+            fn (\Illuminate\Http\Request $request) => '/'.($request->route('community') ?? 'fad').'/login'
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -10,7 +10,7 @@ class HealthTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->component('Welcome'));
+            ->assertInertia(fn ($page) => $page->component('Landing'));
     }
 
     public function test_health_endpoint(): void
