@@ -23,6 +23,8 @@ Route::prefix('{community}')
             Route::middleware('admin')->group(function () {
                 Route::resource('categories', \App\Http\Controllers\CategoryController::class)
                     ->except(['create', 'show', 'edit']);
+                Route::resource('users', \App\Http\Controllers\UserController::class)
+                    ->except(['create', 'show', 'edit']);
             });
         });
     });
