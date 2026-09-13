@@ -347,16 +347,22 @@ Fixed bottom, `pb-[env(safe-area-inset-bottom)]`, target sentuh ≥44 px, ikon +
 
 | Peran | Item |
 |---|---|
-| `anggota` | Dashboard · Laporan · **Tambah** (FAB tengah) · Profil |
-| `admin` | Dashboard · Laporan · **Tambah** · Kategori · Pengguna |
+| `anggota` | Dashboard · **Tambah** (FAB tengah) · Laporan |
+| `admin` | Dashboard · Laporan · **Tambah** (FAB tengah) · Kategori · Pengguna |
+
+**Catatan:** tidak ada halaman "Profil" di aplikasi ini (tidak ada route maupun
+komponen). Draf awal spec ini mencantumkan tab Profil untuk anggota; item itu
+menunjuk ke dashboard (duplikat) dan tidak pernah bisa aktif, sehingga **dihapus**.
+Jangan menambahkannya kembali sebelum halaman profilnya benar-benar ada.
 
 **Kriteria penerimaan wajib:**
 1. `padding-bottom: env(safe-area-inset-bottom)` pada bar.
 2. `<main>` mendapat `pb-24 md:pb-6` sehingga konten tidak tertutup bar.
-3. Tab khusus admin **disembunyikan** untuk `anggota` — grid 3 vs 5 item, bukan sel
-   kosong.
+3. Tab khusus admin **disembunyikan** untuk `anggota` — grid menyesuaikan
+   (3 item anggota, 5 item admin), bukan sel kosong.
 4. Halaman Kategori & Pengguna **dapat dijangkau** dari ponsel oleh admin
    (memperbaiki §3.4).
+5. Tombol Tambah berada di **tengah** untuk kedua peran.
 
 Header mobile: judul + tombol menu/avatar (nama, peran, Keluar) menggantikan tiga
 tautan teks. Ditambah skip-link "Lewati ke konten" dan `focus-visible:ring-2

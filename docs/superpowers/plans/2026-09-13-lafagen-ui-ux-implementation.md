@@ -307,9 +307,14 @@ dari HP).
 
 2. **`BottomNav.vue`** — fixed bottom. **Kriteria penerimaan wajib:**
    - `padding-bottom: env(safe-area-inset-bottom)`.
-   - `anggota` → 4 item (Dashboard · Laporan · Tambah · Profil);
-     `admin` → 5 item (+ Kategori, Pengguna). Item admin **disembunyikan** untuk
-     anggota — grid 3 vs 5, bukan sel kosong.
+   - Tombol **Tambah di tengah** untuk kedua peran.
+   - `anggota` → 3 item (Dashboard · Tambah · Laporan);
+     `admin` → 5 item (Dashboard · Laporan · Tambah · Kategori · Pengguna).
+     Item admin **disembunyikan** untuk anggota — grid menyesuaikan via
+     `items.length`, bukan sel kosong.
+   - **Jangan** menambahkan tab "Profil": tidak ada route/komponennya di aplikasi
+     ini, dan draf awal yang menunjuk `url('dashboard')` hanya menghasilkan
+     duplikat yang tak pernah aktif.
    - Item aktif berwarna `--primary`.
 
 3. **`CommunityLayout.vue`** — sidebar desktop: ikon per item, indikator aktif bar

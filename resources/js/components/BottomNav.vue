@@ -5,7 +5,6 @@ import {
     LayoutDashboard,
     FileText,
     PlusCircle,
-    User,
     Tags,
     Users,
 } from 'lucide-vue-next';
@@ -21,27 +20,42 @@ const page = usePage();
 const role = computed(() => page.props.auth?.user?.role);
 
 /**
- * Anggota: 4 item (Dashboard, Laporan, Tambah, Profil).
- * Admin: 5 item (tambah Kategori & Pengguna).
+ * Tombol "Tambah" selalu berada di tengah agar terjangkau jempol.
+ * - anggota: Dashboard | Tambah | Laporan            (3 item)
+ * - admin:   Dashboard | Laporan | Tambah | Kategori | Pengguna  (5 item)
  * Item admin disembunyikan untuk anggota — grid menyesuaikan, bukan sel kosong.
+ *
+ * Catatan: tidak ada halaman "Profil" di aplikasi ini (tidak ada route maupun
+ * komponennya). Item keempat untuk anggota sempat ada tetapi menunjuk ke
+ * dashboard — duplikat yang tidak pernah aktif — sehingga dihapus. Tambahkan
+ * kembali hanya setelah halaman profilnya benar-benar ada.
  */
 const items = computed(() => {
-    const base = [
+    const left = [
         { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: url('dashboard') },
+    ];
+    const right = [
         { key: 'reports', label: 'Laporan', icon: FileText, href: url('reports') },
-        { key: 'create', label: 'Tambah', icon: PlusCircle, href: url('reports/create'), fab: true },
     ];
 
     if (role.value === 'admin') {
-        base.push(
+        left.push({ key: 'reports', label: 'Laporan', icon: FileText, href: url('reports') });
+        right.length = 0;
+        right.push(
             { key: 'categories', label: 'Kategori', icon: Tags, href: url('categories') },
             { key: 'users', label: 'Pengguna', icon: Users, href: url('users') },
         );
-    } else {
-        base.push({ key: 'profile', label: 'Profil', icon: User, href: url('dashboard') });
     }
 
-    return base;
+    const fab = {
+        key: 'create',
+        label: 'Tambah',
+        icon: PlusCircle,
+        href: url('reports/create'),
+        fab: true,
+    };
+
+    return [...left, fab, ...right];
 });
 
 function isActive(key) {
@@ -58,7 +72,7 @@ function isActive(key) {
             class="mx-auto grid max-w-lg items-end gap-1 px-2 py-1"
             :style="{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }"
         >
-            <li v-for="item in items" :key="item.key">
+            <li v-for="(item, i) in items" :key="item.key + '-' + i">
                 <NavItem
                     :href="item.href"
                     :label="item.label"

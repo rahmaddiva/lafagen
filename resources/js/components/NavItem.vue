@@ -61,11 +61,12 @@ const props = defineProps({
     <Link
         v-else
         :href="href"
-        :aria-label="label"
+        :aria-current="active ? 'page' : undefined"
         class="flex min-h-[44px] flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-[10px] font-semibold leading-tight text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
         <span
-            class="flex h-11 w-11 items-center justify-center rounded-full bg-primary shadow-lift"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-primary shadow-lift transition-all"
+            :class="active ? 'bg-primary-strong ring-2 ring-primary ring-offset-2 ring-offset-card' : ''"
         >
             <component :is="icon" class="h-5 w-5" aria-hidden="true" />
         </span>
