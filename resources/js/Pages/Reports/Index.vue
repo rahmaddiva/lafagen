@@ -177,7 +177,7 @@ const hasFilters = computed(() => activeChips.value.length > 0);
                 id="filter-laporan"
                 :class="cn('gap-2 p-4 pt-0 md:block md:p-4', filterOpen ? 'block' : 'hidden md:block')"
             >
-                <form class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5" @submit.prevent="apply">
+                <form class="grid gap-2 sm:grid-cols-2 lg:grid-cols-6" @submit.prevent="apply">
                     <Select v-model="form.month" aria-label="Saring berdasarkan bulan" class="min-h-[44px]">
                         <option value="">Semua bulan</option>
                         <option v-for="m in months" :key="m.value" :value="m.value">{{ m.label }}</option>
@@ -200,7 +200,7 @@ const hasFilters = computed(() => activeChips.value.length > 0);
                             class="min-h-[44px] pl-9"
                         />
                     </div>
-                    <div class="flex gap-2 sm:col-span-2 lg:col-span-1">
+                    <div class="flex gap-2 sm:col-span-2 lg:col-span-2">
                         <Button type="submit" class="min-h-[44px] flex-1">Terapkan</Button>
                         <Button type="button" variant="outline" class="min-h-[44px]" @click="reset">
                             <RotateCcw class="h-4 w-4" aria-hidden="true" />

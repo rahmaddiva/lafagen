@@ -112,7 +112,7 @@ function formatTanggal(value) {
                     </span>
                     <Link
                         :href="url('reports/create')"
-                        class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-card transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow-card transition-colors hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 max-md:min-h-[44px]"
                     >
                         Buat laporan
                         <ArrowRight class="h-3.5 w-3.5" aria-hidden="true" />
@@ -136,7 +136,7 @@ function formatTanggal(value) {
                     :aria-pressed="y === year"
                     :class="
                         cn(
-                            'min-h-[36px] rounded-md px-3.5 text-sm font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'min-h-[36px] max-md:min-h-[44px] rounded-md px-3.5 text-sm font-semibold tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                             y === year
                                 ? 'bg-card text-foreground shadow-card'
                                 : 'text-muted-foreground hover:text-foreground',
@@ -218,7 +218,7 @@ function formatTanggal(value) {
                 </div>
                 <Link
                     :href="url('reports')"
-                    class="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded max-md:min-h-[44px]"
                 >
                     Lihat semua
                     <ArrowRight class="h-4 w-4" aria-hidden="true" />

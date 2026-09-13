@@ -164,8 +164,7 @@ watch(
                         size="icon"
                         :disabled="logoutForm.processing"
                         aria-label="Keluar"
-                        class="focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        @click="logout"
+                        class="h-11 w-11 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                         <LogOut class="h-5 w-5" aria-hidden="true" />
                     </Button>
