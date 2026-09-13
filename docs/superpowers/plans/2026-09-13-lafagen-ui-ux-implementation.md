@@ -243,9 +243,27 @@ props: { variant: 'text' | 'card' | 'chart', count: Number (default 1) }
    Jalankan `php artisan test --filter=StreakTest` → **FAIL**.
 
 2. **`$monthly` — ganti 12 kueri jadi satu.** Ganti loop `for ($m = 1; $m <= 12; $m++)`
-   dengan satu query `GROUP BY MONTH(start_date)`, lalu isi 12 slot (bulan tanpa
-   data = 0). Bentuk output **harus tetap** `[{month, label, total}]` × 12 karena
-   `DashboardTest` mengunci `monthly.5.total`.
+   dengan satu query agregat, lalu isi 12 slot (bulan tanpa data = 0). Bentuk output
+   **harus tetap** `[{month, label, total}]` × 12 karena `DashboardTest` mengunci
+   `monthly.5.total`.
+
+   **Batasan portabilitas SQL (penting):** `phpunit.xml:30-31` memaksa
+   `DB_CONNECTION=sqlite` (`force="true"`), sedangkan dev/prod MySQL.
+   **SQLite tidak punya `MONTH()`**, dan MySQL dev berjalan dengan
+   `ONLY_FULL_GROUP_BY`. Solusi yang dipakai dan sudah terbukti di kedua mesin:
+   pilih ekspresi berdasarkan driver, lalu tetap `GROUP BY` ekspresi yang sama —
+
+   ```php
+   $monthExpr = match (DB::connection()->getDriverName()) {
+       'sqlite' => "cast(strftime('%m', start_date) as integer)",
+       'pgsql'  => 'extract(month from start_date)::integer',
+       default  => 'month(start_date)',
+   };
+   ```
+
+   **Jangan** menyelesaikan test merah dengan mengganti koneksi DB atau menghapus
+   assertion. Untuk `today`/`week`/`this_month`, pakai `whereDate`/`whereBetween`
+   (bukan `DB::raw` fungsi tanggal) agar driver-safe.
 
 3. **Tambah `stats.prev_month`** — jumlah laporan bulan lalu. Hanya menambah kunci.
 
@@ -306,6 +324,17 @@ dari HP).
    animasi masuk berurutan.
 
 **Verifikasi (browser, bukan asumsi):**
+
+- **Tema saat navigasi SPA (§3.5b) — wajib, dan `tab.goto()` TIDAK bisa dipakai:**
+  sebagai tamu, buka `/` lalu klik kartu komunitas sebagai `<Link>` Inertia:
+  ```js
+  await tab.click('a[href="/fad/login"]');
+  // harus: dataset.community === 'fad' dan --primary === '166 75% 28%'
+  await tab.click('a[href="/genre/login"]');   // dari / lagi
+  // harus: dataset.community === 'genre' dan --primary === '205 90% 40%'
+  ```
+  Full page load (`tab.goto`) merender ulang blade dan **selalu** lolos, sehingga
+  tidak mendeteksi bug ini sama sekali.
 - 375px: `BottomNav` terlihat; `<main>` **tidak** tertutup (ukur
   `getBoundingClientRect()` elemen terakhir vs offset bar).
 - Login sebagai `admin`, 375px: **halaman Kategori dan Pengguna dapat dibuka** —

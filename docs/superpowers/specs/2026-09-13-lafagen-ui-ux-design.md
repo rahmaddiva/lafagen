@@ -88,6 +88,9 @@ melainkan **permukaan yang belum bertoken**. Setelah desain ulang (yang memakai
 token), celah `public` ini akan mulai terlihat — karena itu blok brand `public`
 wajib ditambahkan lebih dulu.
 
+**Batas perbaikan ini:** menambah blok `public` memperbaiki Landing, tetapi **tidak**
+memperbaiki tema yang tertinggal saat navigasi SPA — itu cacat terpisah, lihat §3.5b.
+
 ### 3.4 Navigasi mobile tidak lengkap — bug akses
 
 `CommunityLayout.vue` menyembunyikan sidebar pada `<768px` (`hidden … md:flex`).
@@ -105,6 +108,10 @@ anggaran verifikasi (sesuai keputusan #11: token disinkronkan agar tidak rusak).
 
 ### 3.5b Tema komunitas tertinggal saat navigasi Inertia — bug nyata
 
+**Ini temuan dengan dampak terbesar di seluruh audit:** alur pengguna yang paling
+alami (tamu membuka `/`, lalu mengeklik kartu FAD) menghasilkan halaman login yang
+**salah tema**.
+
 `data-community` pada `<html>` di-set **hanya** server-side di `app.blade.php:2`.
 Navigasi Inertia (`<Link>`) tidak me-render ulang blade, dan `resources/js/app.js`
 tidak punya hook apa pun yang memperbarui atribut itu (grep: 0 hasil untuk
@@ -113,9 +120,11 @@ tidak punya hook apa pun yang memperbarui atribut itu (grep: 0 hasil untuk
 Akibat yang **terverifikasi di browser**: dari landing (`data-community='public'`),
 klik kartu FAD adalah Inertia visit — atribut tetap `public`, sehingga halaman login
 FAD dirender dengan token netral (`--primary: 240 5.9% 10%`), **bukan teal**
-(`166 75% 28%`). Ini membuat premis §3.3/§4.3 ("Landing kini bisa bertoken")
-setengah berfungsi: blok `public` memang terpasang, tetapi nilai komunitas tidak
-pernah masuk setelah navigasi SPA.
+(`166 75% 28%`). Blok `public` (§4.3) memang terpasang dan benar untuk Landing;
+yang salah adalah nilai komunitas **tidak pernah masuk setelah navigasi SPA**.
+Karena itu §3.3 (celah `public`) dan §3.5b (nilai basi) adalah dua hal berbeda —
+§3.3 sudah diperbaiki dengan menambah blok `public`, sedangkan §3.5b ini adalah
+cacat tersendiri yang blok itu **tidak** memperbaiki.
 
 **Perbaikan** (di `resources/js/app.js`): sinkronkan pada initial load **dan** pada
 event `navigate` router Inertia:
@@ -127,14 +136,21 @@ function syncCommunityTheme(page) {
         document.documentElement.dataset.community = key;
     }
 }
-// di dalam setup(): 
+// di dalam setup():
 syncCommunityTheme(props.initialPage);
 router.on('navigate', (event) => syncCommunityTheme(event.detail.page));
 ```
 
-**Catatan metode verifikasi:** `tab.goto()` adalah full document load sehingga
-**menyembunyikan** bug ini (blade dirender ulang, atribut benar). Bukti harus diambil
-setelah klik `<Link>` sungguhan di dalam aplikasi.
+**Catatan metode verifikasi (penting):** `tab.goto()` adalah full document load
+sehingga **menyembunyikan** bug ini sepenuhnya (blade dirender ulang, atribut benar).
+Bukti harus diambil setelah klik `<Link>` sungguhan:
+
+```js
+await tab.click('a[href="/fad/login"]');
+// lalu: dataset.community === 'fad' dan --primary === '166 75% 28%'
+```
+
+Probe pertama saya (`tab.goto('/')`) sempat menyesatkan karena alasan ini.
 
 ### 3.6 Inkonsistensi kapitalisasi direktori — gagal build di Linux
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Community;
 use App\Models\Category;
 use App\Models\Report;
 use App\Models\User;
@@ -23,14 +24,13 @@ class DashboardController extends Controller
         $thisMonth = Report::filtered($community, ['year' => now()->year, 'month' => now()->month])->count();
         $thisYear = Report::filtered($community, ['year' => $year])->count();
 
-        $monthly = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $monthly[] = [
-                'month' => $m,
-                'label' => $this->monthLabel($m),
-                'total' => Report::filtered($community, ['year' => $year, 'month' => $m])->count(),
-            ];
-        }
+        $prev = now()->startOfMonth()->subMonthNoOverflow();
+        $prevMonth = Report::filtered($community, [
+            'year' => $prev->year,
+            'month' => $prev->month,
+        ])->count();
+
+        $monthly = $this->monthlyTotals($community, $year);
 
         $byCategory = Category::query()
             ->where('categories.community', $community->value)
@@ -55,6 +55,7 @@ class DashboardController extends Controller
                 'category_name' => $r->category->name,
                 'start_date' => $r->start_date->format('Y-m-d'),
                 'user_name' => $r->user->name,
+                'created_ago' => $r->created_at->diffForHumans(),
             ])->all();
 
         return Inertia::render('Dashboard', [
@@ -65,12 +66,103 @@ class DashboardController extends Controller
                 'total_members' => $totalMembers,
                 'this_month' => $thisMonth,
                 'this_year' => $thisYear,
+                'prev_month' => $prevMonth,
             ],
+            'activity' => $this->activity($community),
             'monthly' => $monthly,
             'byCategory' => $byCategory,
             'recent' => $recent,
             'year' => $year,
         ]);
+    }
+
+    /**
+     * Total per bulan dalam satu query (bukan 12 query terpisah).
+     *
+     * @return array<int, array{month:int,label:string,total:int}>
+     */
+    private function monthlyTotals(Community $community, int $year): array
+    {
+        $monthExpr = match (DB::connection()->getDriverName()) {
+            'sqlite' => "cast(strftime('%m', start_date) as integer)",
+            'pgsql' => 'extract(month from start_date)::integer',
+            default => 'month(start_date)',
+        };
+
+        $totals = Report::query()
+            ->where('community', $community->value)
+            ->whereYear('start_date', $year)
+            ->groupBy(DB::raw($monthExpr))
+            ->select(DB::raw("{$monthExpr} as m"), DB::raw('count(*) as total'))
+            ->pluck('total', 'm');
+
+        $monthly = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $monthly[] = [
+                'month' => $m,
+                'label' => $this->monthLabel($m),
+                'total' => (int) ($totals[$m] ?? 0),
+            ];
+        }
+
+        return $monthly;
+    }
+
+    /**
+     * Aktivitas pelaporan + streak bulan berurutan.
+     *
+     * @return array{today:int,week:int,this_month:int,streak:int}
+     */
+    private function activity(Community $community): array
+    {
+        $base = fn () => Report::query()->where('community', $community->value);
+
+        $today = $base()->whereDate('start_date', now()->toDateString())->count();
+        $week = $base()->whereBetween('start_date', [
+            now()->startOfWeek()->toDateString(),
+            now()->endOfWeek()->toDateString(),
+        ])->count();
+        $thisMonth = $base()
+            ->whereYear('start_date', now()->year)
+            ->whereMonth('start_date', now()->month)
+            ->count();
+
+        return [
+            'today' => $today,
+            'week' => $week,
+            'this_month' => $thisMonth,
+            'streak' => $this->streak($community),
+        ];
+    }
+
+    /**
+     * Jumlah bulan berurutan yang punya >= 1 laporan, dihitung mundur dari bulan
+     * berjalan. Bulan berjalan tanpa laporan berarti streak 0.
+     */
+    private function streak(Community $community): int
+    {
+        $monthExpr = match (DB::connection()->getDriverName()) {
+            'sqlite' => "cast(strftime('%Y%m', start_date) as integer)",
+            'pgsql' => "cast(to_char(start_date, 'YYYYMM') as integer)",
+            default => "cast(date_format(start_date, '%Y%m') as unsigned)",
+        };
+
+        $keys = Report::query()
+            ->where('community', $community->value)
+            ->groupBy(DB::raw($monthExpr))
+            ->select(DB::raw($monthExpr.' as ym'))
+            ->pluck('ym')
+            ->map(fn ($v) => (int) $v)
+            ->flip();
+
+        $streak = 0;
+        $cursor = now()->startOfMonth();
+        while ($keys->has((int) $cursor->format('Ym'))) {
+            $streak++;
+            $cursor = $cursor->copy()->subMonthNoOverflow();
+        }
+
+        return $streak;
     }
 
     private function monthLabel(int $month): string

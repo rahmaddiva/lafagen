@@ -4,7 +4,19 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::inertia('/', 'Landing')->name('landing');
+Route::get('/', function () {
+    return Inertia::render('Landing', [
+        'title' => 'Lafagen',
+        'counts' => collect(config('communities'))->mapWithKeys(
+            fn ($c, $key) => [
+                $key => [
+                    'members' => \App\Models\User::where('community', $key)->count(),
+                    'reports' => \App\Models\Report::where('community', $key)->count(),
+                ],
+            ]
+        )->all(),
+    ]);
+})->name('landing');
 Route::prefix('{community}')
     ->where(['community' => 'fad|genre'])
     ->middleware('community')
