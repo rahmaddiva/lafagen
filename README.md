@@ -61,9 +61,11 @@ Seeder juga membuat 6 kategori default per komunitas dan 20 laporan demo
 Logo komunitas: `public/images/fad.png` dan `public/images/genre.png` — PNG 256×256
 hasil normalisasi dari logo asli yang Anda serahkan. Ganti dua file itu dengan
 versi baru — tidak ada perubahan kode yang diperlukan. Favicon tab mengikuti
-komunitas aktif (FAD hijau, GENRE biru). Nama/tagline/warna komunitas diatur di
-`config/communities.php`. File asli di `public/logo_fad.jpg` dan
-`public/logo_genre.png` sudah tidak dipakai dan boleh dihapus.
+komunitas aktif (logo FAD / logo GENRE; landing memakai lambang netral
+`public/favicon.png`). Warna tema per komunitas diatur sebagai CSS variables di
+`resources/css/app.css` (FAD teal; GENRE Oxford Blue `#042948` + Pale Peach
+`#fde5a9`), sedangkan nama/logo di `config/communities.php`. File asli di
+`public/logo_fad.jpg` dan `public/logo_genre.png` sudah tidak dipakai dan boleh
 
 ## Test
 
