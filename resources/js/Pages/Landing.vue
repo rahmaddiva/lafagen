@@ -1,44 +1,100 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Users, FileText, ArrowRight } from 'lucide-vue-next';
+
+const props = defineProps({
+    counts: { type: Object, default: () => ({}) },
+});
+
+const communities = computed(() => [
+    {
+        key: 'fad',
+        short: 'FAD',
+        name: 'Forum Anak Daerah',
+        tagline: 'Masuk sebagai anggota FAD Tanah Laut',
+    },
+    {
+        key: 'genre',
+        short: 'GENRE',
+        name: 'Generasi Berencana',
+        tagline: 'Masuk sebagai anggota GENRE Tanah Laut',
+    },
+]);
+
+const stat = (key, field) => props.counts?.[key]?.[field] ?? 0;
 </script>
 
 <template>
-    <div class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-200">
-        <div class="mx-auto max-w-4xl px-6 py-20 text-center">
-            <h1 class="text-4xl font-extrabold tracking-tight text-slate-800">
+    <div
+        class="relative min-h-screen overflow-hidden bg-background"
+    >
+        <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-primary-soft to-transparent"
+            aria-hidden="true"
+        />
+
+        <div class="relative mx-auto max-w-4xl px-6 py-16 text-center sm:py-24">
+            <span
+                class="animate-rise inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary-foreground"
+            >
+                Kabupaten Tanah Laut
+            </span>
+
+            <h1
+                class="animate-rise mt-5 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
+            >
                 Lafagen
             </h1>
-            <p class="mt-2 text-lg text-slate-500">
-                Sistem Laporan Program Kerja Komunitas — Kabupaten Tanah Laut
+            <p class="animate-rise mt-3 text-base text-muted-foreground sm:text-lg">
+                Sistem Laporan Program Kerja Komunitas
             </p>
+
             <div class="mt-12 grid gap-6 sm:grid-cols-2">
                 <Link
-                    href="/fad/login"
-                    class="group rounded-2xl border bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                    v-for="(c, i) in communities"
+                    :key="c.key"
+                    :href="`/${c.key}/login`"
+                    class="animate-rise group flex flex-col items-center rounded-2xl border bg-card p-8 text-center shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    :style="{ animationDelay: `${i * 90}ms` }"
                 >
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-100 text-2xl font-black text-teal-700">
-                        FAD
-                    </div>
-                    <h2 class="mt-4 text-xl font-bold text-slate-800">
-                        Forum Anak Daerah
-                    </h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Masuk sebagai anggota FAD Tanah Laut
-                    </p>
-                </Link>
-                <Link
-                    href="/genre/login"
-                    class="group rounded-2xl border bg-white p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-                >
-                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-2xl font-black text-sky-700">
-                        GENRE
-                    </div>
-                    <h2 class="mt-4 text-xl font-bold text-slate-800">
-                        Generasi Berencana
-                    </h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                        Masuk sebagai anggota GENRE Tanah Laut
-                    </p>
+                    <span
+                        class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-foreground"
+                    >
+                        {{ c.short }}
+                    </span>
+
+                    <h2 class="mt-4 text-xl font-bold text-foreground">{{ c.name }}</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">{{ c.tagline }}</p>
+
+                    <dl class="mt-5 flex items-center gap-4 text-sm">
+                        <div class="flex items-center gap-1.5">
+                            <Users class="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                            <dt class="sr-only">Anggota</dt>
+                            <dd class="font-semibold tabular-nums">
+                                {{ stat(c.key, 'members') }}
+                                <span class="font-normal text-muted-foreground">anggota</span>
+                            </dd>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <FileText class="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                            <dt class="sr-only">Laporan</dt>
+                            <dd class="font-semibold tabular-nums">
+                                {{ stat(c.key, 'reports') }}
+                                <span class="font-normal text-muted-foreground">laporan</span>
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <span
+                        class="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary"
+                    >
+                        Masuk
+                        <ArrowRight
+                            class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                            aria-hidden="true"
+                        />
+                    </span>
                 </Link>
             </div>
         </div>
