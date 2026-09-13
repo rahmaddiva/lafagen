@@ -105,14 +105,22 @@ anggaran verifikasi (sesuai keputusan #11: token disinkronkan agar tidak rusak).
 
 ### 3.6 Inkonsistensi kapitalisasi direktori — gagal build di Linux
 
-Direktori nyata: `resources/js/components/` (huruf kecil). Impor memakai huruf besar:
+Kapitalisasi nyata di disk (diverifikasi dengan `Get-ChildItem -Directory`, karena
+filesystem Windows tidak peka huruf besar/kecil sehingga `ls -d` **tidak** dapat
+membuktikan apa pun): `components` (huruf kecil), `composables`, `Layouts`, `Pages`.
 
-- `Dashboard.vue` → `@/Components/StatCard.vue`, `@/Components/charts/MonthlyBar.vue`
-- `Reports/Index.vue` → `@/Components/EmptyState.vue`
-- `Reports/Form.vue` → `@/Components/PhotoUploader.vue`
+Jadi masalahnya **hanya pada `@/Components/`** — bukan "semua impor". Impor
+`@/Layouts/…` dan `@/Pages/…` sudah benar. Yang harus dinormalisasi ke
+`@/components/`:
+
+- `Pages/Dashboard.vue:9-11` → `StatCard`, `charts/MonthlyBar`, `charts/CategoryDonut`
+- `Pages/Reports/Index.vue:15` → `EmptyState`
+- `Pages/Reports/Form.vue:11` → `PhotoUploader`
 
 Windows tidak peka huruf besar/kecil sehingga lolos; pada server Linux
-(case-sensitive) `npm run build` **gagal**. Harus dinormalisasi ke `@/components/`.
+(case-sensitive) `npm run build` **gagal**. Bukti perbaikan harus berupa pemeriksaan
+peka huruf besar/kecil: `grep -rn "@/Components/" resources/js` → **0 hasil**
+(`ls -d` tidak bermakna di filesystem yang tidak peka huruf besar/kecil).
 
 ### 3.7 Paginasi bukan tautan
 
@@ -188,7 +196,33 @@ sehingga donut terbaca sebagai satu identitas.
 Token `.dark` disinkronkan agar tidak ada variabel yang hilang, **tanpa** verifikasi
 kontras (kode mati, §3.5).
 
-### 4.4 Tipografi & skala
+### 4.4 Pemetaan utilitas Tailwind (WAJIB, satu commit dengan §4.3)
+
+**Jebakan Tailwind v3:** mendeklarasikan variabel CSS baru di `app.css` **tidak**
+menghasilkan utilitas apa pun. `tailwind.config.js` menyebut `colors` secara
+eksplisit satu per satu (`background`, `card`, `primary`, `secondary`, `muted`,
+`accent`, `destructive`, `border`, `input`, `ring`, `chart-1..5`). Tanpa penambahan
+di config, kelas seperti `bg-primary-soft`, `text-success`, atau `bg-warning` akan
+**gagal senyap** — tidak ada error, kelasnya hanya tidak dirender.
+
+`theme.extend.colors` harus ditambah, **dalam commit yang sama** dengan variabel CSS:
+
+```js
+'primary-soft':  'hsl(var(--primary-soft))',
+'primary-strong':'hsl(var(--primary-strong))',
+success: { DEFAULT: 'hsl(var(--success))',
+           foreground: 'hsl(var(--success-foreground))',
+           soft: 'hsl(var(--success-soft))' },
+warning: { /* idem */ },
+info:    { /* idem */ },
+// chart-1..5 sudah ada di config dan tetap dipertahankan;
+// yang berubah hanya nilainya di app.css (§4.3).
+```
+
+Catatan: `chart-3..5` sudah terpetakan di config, jadi yang perlu diperbaiki untuk
+chart hanyalah nilai variabelnya — bukan pemetaannya.
+
+### 4.5 Tipografi & skala
 
 | Peran | Kelas | Catatan |
 |---|---|---|
@@ -198,7 +232,7 @@ kontras (kode mati, §3.5).
 | Body | `text-sm` | |
 | Meta | `text-xs text-muted-foreground` | |
 
-### 4.5 Motion
+### 4.6 Motion
 
 Keyframes `rise` (translateY 8px + opacity), `pop` (scale 0.96→1), `grow` (scaleY 0→1
 untuk bar chart). Durasi 150–250 ms, easing `cubic-bezier(0.16, 1, 0.3, 1)`. Semua
@@ -328,8 +362,20 @@ terpenuhi karena perubahan hanya **menambah** kunci. `HealthTest`/`AuthTest` men
 | Kapitalisasi direktori hanya muncul saat build | `npm run build` masuk daftar verifikasi wajib (§9.3) |
 | Model tidak dapat menilai estetika secara visual | Keterbatasan dinyatakan eksplisit; screenshot diserahkan ke user untuk penilaian akhir |
 
-## 11. Catatan Drift Dokumen Lama
+## 11. Supersesi & Catatan Drift Dokumen Lama
 
-Spec 2026-09-10 menyebut grafik memakai `recharts` dan "Inertia.js v1". Implementasi
-nyata memakai SVG tulis-tangan dan `inertia-laravel ^2.0`. Spec ini mengikuti
-implementasi nyata; dokumen lama tidak diubah di luar cakupan ini.
+Spec 2026-09-10 (`2026-09-10-lafagen-design.md`) adalah dokumen yang **disetujui user**
+dan tetap berlaku untuk sistem fungsional (skema data, otorisasi, isolasi komunitas).
+Namun pada dua titik implementasi menyimpang darinya, dan spec ini secara eksplisit
+**menggantikan** bagian tersebut agar kedua dokumen tidak saling bertentangan:
+
+| Bagian spec lama | Isi lama | Kenyataan implementasi | Status |
+|---|---|---|---|
+| §2 baris "Grafik" | `recharts` via chart wrapper shadcn-vue | `package.json` tidak memuat `recharts`; chart adalah SVG tulis-tangan di `Components/charts/` | **Digantikan** — §2 spec ini: tetap SVG, tanpa pustaka baru |
+| §2 baris "Frontend" | "Inertia.js v1" | `composer.json` memakai `inertiajs/inertia-laravel ^2.0` | **Digantikan** — spec ini mengikuti v2 |
+| §4 (tema via CSS variables) | tema lewat `data-community` | benar dan dipertahankan | **Diperluas** — §4.4 menambah pemetaan `colors` di Tailwind yang belum ada |
+
+Perbaikan kapitalisasi impor (§3.6) juga dicatat di sini agar dapat dilacak: ia bukan
+keputusan desain baru, melainkan bug yang belum terdeteksi sampai build Linux.
+
+Dokumen lama tidak diubah di luar cakupan ini.
