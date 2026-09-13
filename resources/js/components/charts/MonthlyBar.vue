@@ -198,7 +198,7 @@ const hasData = computed(() => props.data.some((d) => d.total > 0));
                     <!-- tooltip HTML: muncul saat hover DAN fokus keyboard -->
                     <div
                         v-if="active !== null && data[active]"
-                        class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-popover"
+                        class="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-lift"
                         :style="{ left: `${tipX(active)}%`, top: `${tipY(data[active].total) - 2}%` }"
                         role="status"
                     >
