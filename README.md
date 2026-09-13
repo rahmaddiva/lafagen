@@ -6,12 +6,17 @@ dua tema/area terpisah, data antar komunitas terisolasi.
 
 ## Fitur
 
-- Landing pemilihan komunitas, halaman login bertema (FAD hijau-teal, GENRE biru).
+- Landing pemilihan komunitas dengan statistik tiap komunitas; halaman login dua
+  panel bertema (FAD hijau-teal, GENRE biru).
+- Navigasi responsif: sidebar ber-ikon di desktop, bottom bar dengan FAB tengah di
+  ponsel (termasuk Kategori & Pengguna untuk admin).
 - CRUD laporan proker: judul, kategori, tanggal mulai/selesai, lokasi, deskripsi,
-  unggah banyak foto dokumentasi (JPG/PNG/WEBP, maks 5 MB/foto, maks 10 foto).
-- Filter laporan per bulan/tahun/kategori + pencarian, paginasi 15/halaman.
-- Dashboard: total laporan, jumlah anggota, laporan bulan/tahun berjalan,
-  grafik batang per bulan, donut per kategori, 5 laporan terbaru, pemilih tahun.
+  unggah banyak foto dokumentasi lewat dropzone seret-lepas (JPG/PNG/WEBP,
+  maks 5 MB/foto, maks 10 foto).
+- Filter laporan per bulan/tahun/kategori + pencarian dengan chip filter aktif,
+  paginasi 15/halaman berupa tautan `<a>` sungguhan (bisa klik-tengah/Ctrl+klik).
+- Dashboard: sapaan, 4 kartu statistik ber-ikon + tren vs bulan lalu, grafik batang
+  per bulan, donut per kategori, panel aktivitas + streak, dan 5 laporan terbaru.
 - Manajemen kategori dan pengguna (khusus admin komunitas).
 - Export Excel mengikuti filter yang aktif di halaman laporan.
 - Hak akses: `anggota` mengelola laporannya sendiri; `admin` mengelola seluruh
@@ -59,9 +64,24 @@ perubahan kode yang diperlukan. Nama/warna komunitas diatur di `config/communiti
 ## Test
 
 ```bash
-php artisan test          # 45 test: auth, isolasi komunitas, laporan, dashboard, kategori, pengguna, export
+php artisan test          # 53 test: auth, isolasi komunitas, laporan, dashboard, streak, kategori, pengguna, export
 npm run build             # verifikasi build frontend
 ```
+
+`phpunit.xml` memaksa `APP_ENV=testing` + SQLite in-memory lewat `force="true"`
+**dan** blok `<server>`. Keduanya wajib: PHPUnit hanya menulis `<env>` ke
+`putenv()`/`$_ENV`, sedangkan Laravel membaca `$_SERVER` lebih dulu, sehingga
+tanpa mirror itu suite bisa ikut memakai MySQL pengembangan dan `RefreshDatabase`
+akan menghapus isinya.
+
+## Desain
+
+Palet, tipografi, dan komponen mengikuti spec
+`docs/superpowers/specs/2026-09-13-lafagen-ui-ux-design.md` (gaya "Energik
+Sporty" untuk audiens anak & remaja). Warna tidak di-hardcode di komponen:
+semua dibaca dari CSS variables (`--primary`, `--chart-1..5`, `--success`,
+dst.) yang di-override per komunitas lewat atribut `data-community` pada
+`<html>`. Ganti tema cukup di `resources/css/app.css`.
 
 ## Catatan operasional
 
