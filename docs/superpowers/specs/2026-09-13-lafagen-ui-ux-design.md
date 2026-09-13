@@ -103,6 +103,39 @@ tetapi `grep` untuk sakelar tema / `prefers-color-scheme` / `class="dark"` di se
 mode. Kontras dark mode karena itu **tidak dapat diobservasi**, sehingga tidak masuk
 anggaran verifikasi (sesuai keputusan #11: token disinkronkan agar tidak rusak).
 
+### 3.5b Tema komunitas tertinggal saat navigasi Inertia — bug nyata
+
+`data-community` pada `<html>` di-set **hanya** server-side di `app.blade.php:2`.
+Navigasi Inertia (`<Link>`) tidak me-render ulang blade, dan `resources/js/app.js`
+tidak punya hook apa pun yang memperbarui atribut itu (grep: 0 hasil untuk
+`dataset.community` / `onPageChange` di seluruh `resources/js`).
+
+Akibat yang **terverifikasi di browser**: dari landing (`data-community='public'`),
+klik kartu FAD adalah Inertia visit — atribut tetap `public`, sehingga halaman login
+FAD dirender dengan token netral (`--primary: 240 5.9% 10%`), **bukan teal**
+(`166 75% 28%`). Ini membuat premis §3.3/§4.3 ("Landing kini bisa bertoken")
+setengah berfungsi: blok `public` memang terpasang, tetapi nilai komunitas tidak
+pernah masuk setelah navigasi SPA.
+
+**Perbaikan** (di `resources/js/app.js`): sinkronkan pada initial load **dan** pada
+event `navigate` router Inertia:
+
+```js
+function syncCommunityTheme(page) {
+    const key = page?.props?.community?.key ?? 'public';
+    if (document.documentElement.dataset.community !== key) {
+        document.documentElement.dataset.community = key;
+    }
+}
+// di dalam setup(): 
+syncCommunityTheme(props.initialPage);
+router.on('navigate', (event) => syncCommunityTheme(event.detail.page));
+```
+
+**Catatan metode verifikasi:** `tab.goto()` adalah full document load sehingga
+**menyembunyikan** bug ini (blade dirender ulang, atribut benar). Bukti harus diambil
+setelah klik `<Link>` sungguhan di dalam aplikasi.
+
 ### 3.6 Inkonsistensi kapitalisasi direktori — gagal build di Linux
 
 Kapitalisasi nyata di disk (diverifikasi dengan `Get-ChildItem -Directory`, karena
