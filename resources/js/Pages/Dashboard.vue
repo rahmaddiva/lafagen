@@ -102,12 +102,6 @@ function formatTanggal(value) {
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-strong"
                     >
-                        <img
-                            v-if="community.logo"
-                            :src="community.logo"
-                            :alt="''"
-                            class="h-4 w-4 rounded-full object-contain"
-                        />
                         {{ community.short }}
                     </span>
                     <Link

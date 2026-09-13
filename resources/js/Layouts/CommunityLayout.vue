@@ -85,9 +85,8 @@ watch(
             >
                 <img
                     :src="community.logo"
-                    :alt="community.short"
-                    class="h-10 w-10 object-contain"
-                    @error="$event.target.style.display = 'none'"
+                    :alt="`Logo ${community.short}`"
+                    class="h-10 w-10 shrink-0 rounded-lg object-contain"
                 >
                 <span class="min-w-0">
                     <span class="block truncate text-sm font-bold leading-tight">

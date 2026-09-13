@@ -5,16 +5,24 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    // Satu sumber kebenaran identitas komunitas: config/communities.php
+    // (nama, singkatan, logo) + statistik langsung dari basis data.
+    $communities = collect(config('communities'))
+        ->map(fn (array $c, string $key) => [
+            'key' => $key,
+            'short' => $c['short'],
+            'name' => $c['name'],
+            'title' => $c['title'],
+            'logo' => $c['logo'],
+            'members' => \App\Models\User::where('community', $key)->count(),
+            'reports' => \App\Models\Report::where('community', $key)->count(),
+        ])
+        ->values()
+        ->all();
+
     return Inertia::render('Landing', [
         'title' => 'Lafagen',
-        'counts' => collect(config('communities'))->mapWithKeys(
-            fn ($c, $key) => [
-                $key => [
-                    'members' => \App\Models\User::where('community', $key)->count(),
-                    'reports' => \App\Models\Report::where('community', $key)->count(),
-                ],
-            ]
-        )->all(),
+        'communities' => $communities,
     ]);
 })->name('landing');
 Route::prefix('{community}')

@@ -1,28 +1,13 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
 import { Users, FileText, ArrowRight } from 'lucide-vue-next';
 
 const props = defineProps({
-    counts: { type: Object, default: () => ({}) },
+    communities: { type: Array, default: () => [] },
 });
 
-const communities = computed(() => [
-    {
-        key: 'fad',
-        short: 'FAD',
-        name: 'Forum Anak Daerah',
-        tagline: 'Masuk sebagai anggota FAD Tanah Laut',
-    },
-    {
-        key: 'genre',
-        short: 'GENRE',
-        name: 'Generasi Berencana',
-        tagline: 'Masuk sebagai anggota GENRE Tanah Laut',
-    },
-]);
-
-const stat = (key, field) => props.counts?.[key]?.[field] ?? 0;
+// Tagline diturunkan dari `title` config ("FAD Tanah Laut").
+const tagline = (c) => `Masuk sebagai anggota ${c.title}`;
 </script>
 
 <template>
@@ -58,21 +43,22 @@ const stat = (key, field) => props.counts?.[key]?.[field] ?? 0;
                     class="animate-rise group flex flex-col items-center rounded-2xl border bg-card p-8 text-center shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     :style="{ animationDelay: `${i * 90}ms` }"
                 >
-                    <span
-                        class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-foreground"
-                    >
-                        {{ c.short }}
-                    </span>
+                    <img
+                        :src="c.logo"
+                        :alt="`Logo ${c.name}`"
+                        loading="lazy"
+                        class="h-20 w-20 rounded-2xl bg-white object-contain p-1 ring-1 ring-border"
+                    />
 
                     <h2 class="mt-4 text-xl font-bold text-foreground">{{ c.name }}</h2>
-                    <p class="mt-1 text-sm text-muted-foreground">{{ c.tagline }}</p>
+                    <p class="mt-1 text-sm text-muted-foreground">{{ tagline(c) }}</p>
 
                     <dl class="mt-5 flex items-center gap-4 text-sm">
                         <div class="flex items-center gap-1.5">
                             <Users class="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                             <dt class="sr-only">Anggota</dt>
                             <dd class="font-semibold tabular-nums">
-                                {{ stat(c.key, 'members') }}
+                                {{ c.members }}
                                 <span class="font-normal text-muted-foreground">anggota</span>
                             </dd>
                         </div>
@@ -80,7 +66,7 @@ const stat = (key, field) => props.counts?.[key]?.[field] ?? 0;
                             <FileText class="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                             <dt class="sr-only">Laporan</dt>
                             <dd class="font-semibold tabular-nums">
-                                {{ stat(c.key, 'reports') }}
+                                {{ c.reports }}
                                 <span class="font-normal text-muted-foreground">laporan</span>
                             </dd>
                         </div>

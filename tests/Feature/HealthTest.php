@@ -11,11 +11,13 @@ class HealthTest extends TestCase
 
     public function test_serves_landing(): void
     {
-        // Landing kini mengirim `counts` per komunitas (2 query agregat), jadi
-        // halaman ini memang butuh database.
+        // Landing mengirim daftar komunitas (nama, logo, agregat anggota &
+        // laporan) — butuh database untuk angkanya.
         $this->get('/')
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->component('Landing'));
+            ->assertInertia(
+                fn ($page) => $page->component('Landing')->has('communities', 2)
+            );
     }
 
     public function test_health_endpoint(): void

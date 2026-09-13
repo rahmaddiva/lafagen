@@ -61,9 +61,8 @@ function submit() {
                 <div class="flex items-center gap-3">
                     <img
                         :src="community.logo"
-                        :alt="community.short"
-                        class="h-11 w-11 rounded-xl bg-white/15 object-contain p-1.5 lg:h-12 lg:w-12"
-                        @error="$event.target.style.display = 'none'"
+                        :alt="`Logo ${community.name}`"
+                        class="h-11 w-11 rounded-xl bg-white object-contain p-1 lg:h-12 lg:w-12"
                     >
                     <span class="text-sm font-bold uppercase tracking-widest opacity-90">
                         {{ community.short }}
