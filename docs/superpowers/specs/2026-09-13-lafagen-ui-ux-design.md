@@ -192,21 +192,36 @@ Yang ditambahkan (aditif, dengan rasio terhitung):
 
 | Token baru | FAD | GENRE | Catatan |
 |---|---|---|---|
-| `--primary-soft` | `162 73% 92%` (samakan dgn `--accent` yang ada) | `204 94% 93%` | latar chip/nav aktif |
-| `--primary-strong` | `166 75% 18%` (= `--accent-foreground`) | `205 90% 30%` | teks di atas soft |
-| `--chart-3` | keluarga teal/emerald | keluarga biru/indigo | **memperbaiki §3.2** |
-| `--chart-4` | keluarga teal | keluarga biru | **memperbaiki §3.2** |
-| `--chart-5` | keluarga lime | keluarga sky | **memperbaiki §3.2** |
-| `--success`, `--warning`, `--info` (+ `-soft`, `-foreground`) | netral, sama utk kedua komunitas | idem | untuk badge/delta |
+| `--primary-soft` | `162 73% 92%` | `204 94% 93%` | latar chip/nav aktif |
+| `--primary-strong` | `166 75% 18%` | `205 90% 30%` | teks di atas soft (8,44:1 / 6,41:1) |
+| `--chart-3` | `168 66% 27%` | `212 80% 33%` | **memperbaiki §3.2** |
+| `--chart-4` | `172 55% 59%` | `198 84% 68%` | **memperbaiki §3.2** |
+| `--chart-5` | `150 48% 46%` | `222 65% 58%` | **memperbaiki §3.2** |
+
+`--chart-1`/`--chart-2` sudah ada di repo dan **tidak diubah**. Token status
+(`--success 142 71% 30%`, `--warning 32 95% 33%`, `--info 217 91% 42%` + pasangan
+`-foreground`/`-soft`) didefinisikan di `:root`; semua pasangan teks/latar sudah
+dihitung dan lolos AA. Nilai literal lengkap ada di rencana implementasi Tugas 1
+langkah 4 — **jangan dibulatkan ke nilai yang lebih terang**, dua kandidat terang
+(`success 142 71% 33%`, `warning 38 92% 34%`) gagal AA.
 
 Blok `public` (baru, untuk Landing) memakai netral Lafagen — dipilih agar tidak
 berkompetisi dengan warna komunitas:
 
 ```css
 [data-community='public'] {
-  --primary: 240 5.9% 10%;        /* netral gelap, sama seperti :root */
+  --primary: 240 5.9% 10%;
   --primary-foreground: 0 0% 98%;
-  --chart-1..5: <skala netral>;
+  --ring: 240 5.9% 10%;
+  --primary-soft: 240 4.8% 95.9%;
+  --primary-strong: 240 5.9% 10%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --chart-1: 240 6% 26%;
+  --chart-2: 240 5% 40%;
+  --chart-3: 240 4% 52%;
+  --chart-4: 240 5% 64%;
+  --chart-5: 240 6% 76%;
 }
 ```
 
@@ -230,8 +245,12 @@ di config, kelas seperti `bg-primary-soft`, `text-success`, atau `bg-warning` ak
 success: { DEFAULT: 'hsl(var(--success))',
            foreground: 'hsl(var(--success-foreground))',
            soft: 'hsl(var(--success-soft))' },
-warning: { /* idem */ },
-info:    { /* idem */ },
+warning: { DEFAULT: 'hsl(var(--warning))',
+           foreground: 'hsl(var(--warning-foreground))',
+           soft: 'hsl(var(--warning-soft))' },
+info:    { DEFAULT: 'hsl(var(--info))',
+           foreground: 'hsl(var(--info-foreground))',
+           soft: 'hsl(var(--info-soft))' },
 // chart-1..5 sudah ada di config dan tetap dipertahankan;
 // yang berubah hanya nilainya di app.css (§4.3).
 ```

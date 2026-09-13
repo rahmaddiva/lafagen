@@ -58,16 +58,68 @@ memperbaiki 8 temuan audit, tanpa mengubah alur bisnis, skema data, atau otorisa
 4. **app.css — JANGAN ubah `--primary`/`--accent` komunitas.** Nilai yang ada
    (`fad: 166 75% 28%`, `genre: 205 90% 40%`) sudah lolos WCAG AA (5,07:1 dan
    4,84:1). Spec awal saya sempat salah menyebut nilai lain; yang benar adalah nilai
-   di repo. Perubahan bersifat **aditif**:
+   di repo. Perubahan bersifat **aditif**. **Pakai nilai literal berikut apa adanya**
+   — semua sudah dihitung rasio kontrasnya:
 
-   - Tambah `--primary-soft` (FAD `162 73% 92%`, GENRE `204 94% 93%`) dan
-     `--primary-strong` (FAD `166 75% 18%`, GENRE `205 90% 30%`).
-   - Tambah `--chart-3/4/5` per komunitas (keluarga teal untuk FAD, biru untuk
-     GENRE) — **memperbaiki §3.2**.
-   - Tambah `--success/--warning/--info` + `-soft` + `-foreground` di `:root`.
-   - Tambah blok `[data-community='public']` dengan palet netral + `--chart-1..5` —
-     **memperbaiki §3.3** (Landing kini bisa bertoken).
-   - Sinkronkan seluruh token baru ke blok `.dark` (tanpa verifikasi kontras).
+   **a. `--primary-soft` / `--primary-strong`** (ditambahkan ke blok komunitas yang ada):
+
+   | Komunitas | `--primary-soft` | `--primary-strong` |
+   |---|---|---|
+   | `[data-community='fad']` | `162 73% 92%` | `166 75% 18%` |
+   | `[data-community='genre']` | `204 94% 93%` | `205 90% 30%` |
+
+   Kontras `primary-strong` di atas `primary-soft`: FAD **8,44:1**, GENRE **6,41:1**.
+
+   **b. `--chart-3/4/5` per komunitas** — ini yang **memperbaiki §3.2**. Nilai
+   `--chart-1` dan `--chart-2` sudah ada di repo; **biarkan**, hanya tambahkan 3–5:
+
+   | Token | FAD (teal family) | GENRE (blue family) |
+   |---|---|---|
+   | `--chart-3` | `168 66% 27%` | `212 80% 33%` |
+   | `--chart-4` | `172 55% 59%` | `198 84% 68%` |
+   | `--chart-5` | `150 48% 46%` | `222 65% 58%` |
+
+   (FAD `--chart-1` tetap `166 75% 35%`, `--chart-2` tetap `160 60% 45%`.
+   GENRE `--chart-1` tetap `205 90% 45%`, `--chart-2` tetap `199 89% 55%`.)
+
+   **c. Blok `public` baru** — memperbaiki §3.3 (Landing kini bertoken):
+
+   ```css
+   [data-community='public'] {
+     --primary: 240 5.9% 10%;
+     --primary-foreground: 0 0% 98%;
+     --ring: 240 5.9% 10%;
+     --primary-soft: 240 4.8% 95.9%;
+     --primary-strong: 240 5.9% 10%;
+     --accent: 240 4.8% 95.9%;
+     --accent-foreground: 240 5.9% 10%;
+     --chart-1: 240 6% 26%;
+     --chart-2: 240 5% 40%;
+     --chart-3: 240 4% 52%;
+     --chart-4: 240 5% 64%;
+     --chart-5: 240 6% 76%;
+   }
+   ```
+
+   **d. Token status di `:root`** (dipakai badge/delta; nilai literal, semua lolos):
+
+   ```css
+   --success: 142 71% 30%;          /* 4,83:1 vs putih */
+   --success-foreground: 142 72% 20%;
+   --success-soft: 138 76% 95%;     /* fg di atas soft: 8,02:1 */
+   --warning: 32 95% 33%;           /* 5,24:1 vs putih */
+   --warning-foreground: 32 95% 22%;
+   --warning-soft: 48 96% 92%;      /* fg di atas soft: 8,43:1 */
+   --info: 217 91% 42%;             /* 6,64:1 vs putih */
+   --info-foreground: 217 91% 28%;
+   --info-soft: 214 95% 94%;        /* fg di atas soft: 9,26:1 */
+   ```
+
+   **Catatan penting:** `success` pada `142 71% 33%` dan `warning` pada `38 92% 34%`
+   **GAGAL** AA (4,11:1 dan 4,40:1). Jangan "membulatkan" nilai di atas ke angka
+   yang lebih terang.
+
+   Sinkronkan seluruh token baru ke blok `.dark` (tanpa verifikasi kontras).
 
 5. **app.css — motion.** Keyframes `rise`, `pop`, `grow` di dalam
    `@media (prefers-reduced-motion: no-preference)`; tambah blok
@@ -82,8 +134,19 @@ memperbaiki 8 temuan audit, tanpa mengubah alur bisnis, skema data, atau otorisa
 - Dev server jalan; probe browser: `getComputedStyle(document.body).fontFamily`
   mengandung `Plus Jakarta Sans`, dan `document.fonts.check('16px "Plus Jakarta Sans"')`
   → `true` (membuktikan font benar-benar termuat, bukan hanya dideklarasikan).
-- Probe: pada `/fad/dashboard`, `getComputedStyle(document.documentElement).getPropertyValue('--chart-3')`
-  → keluarga teal, **bukan** `197 37% 24%`.
+- Probe di dev server (bukan asumsi):
+  ```js
+  const cs = getComputedStyle(document.documentElement);
+  // di /fad/dashboard
+  cs.getPropertyValue('--chart-3').trim();  // harus "168 66% 27%"
+  cs.getPropertyValue('--chart-4').trim();  // harus "172 55% 59%"
+  cs.getPropertyValue('--chart-5').trim();  // harus "150 48% 46%"
+  // di /genre/dashboard
+  cs.getPropertyValue('--chart-3').trim();  // harus "212 80% 33%"
+  ```
+  Nilai `197 37% 24%` (bawaan lama) **tidak boleh** muncul di kedua komunitas.
+- Probe `--primary` di `/fad/dashboard` harus tetap `166 75% 28%` (membuktikan
+  palet lama tidak dirusak), dan di `/` harus terdefinisi (blok `public` ada).
 
 ---
 
@@ -280,8 +343,19 @@ dari HP).
 - `grep -rn "@/Components/" resources/js` → 0 hasil; `npm run build` sukses.
 - 375/768/1024/1440px: tidak ada overflow horizontal
   (`document.documentElement.scrollWidth <= innerWidth`).
-- Donut: irisan ke-3 dan seterusnya memakai warna keluarga komunitas, **bukan**
-  navy/oranye bawaan (membuktikan §3.2 diperbaiki).
+- Donut (membuktikan §3.2 diperbaiki): baca `fill` tiap irisan dan bandingkan
+  dengan token terkomputasi:
+  ```js
+  const cs = getComputedStyle(document.documentElement);
+  const expect = [1,2,3,4,5].map(i => `hsl(${cs.getPropertyValue('--chart-'+i).trim()})`);
+  const fills = [...document.querySelectorAll('[data-donut-slice]')].map(e => e.getAttribute('fill'));
+  // fills[0..4] harus berurutan sama dengan expect, dan
+  // TIDAK boleh ada '197 37% 24%' | '43 74% 66%' | '27 87% 67%'
+  // juga TIDAK boleh ada hex hardcoded lama: #65a30d | #ca8a04 | #dc2626
+  ```
+  Di `/fad/dashboard` warna irisan ke-3 harus `168 66% 27%`; di `/genre/dashboard`
+  harus `212 80% 33%`. Tambahkan `data-donut-slice` pada `<path>` donut agar
+  pemeriksaan ini mungkin.
 - Tooltip bar chart muncul saat **keyboard** fokus, bukan hanya hover.
 - Daftar "5 laporan terbaru" muncul **tepat satu kali** di DOM (membuktikan
   kontradiksi §6/§7.3 benar-benar terselesaikan).
