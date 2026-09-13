@@ -14,9 +14,19 @@ export default {
     	extend: {
     		fontFamily: {
     			sans: [
+    				'"Plus Jakarta Sans"',
+    				'Figtree',
+                    ...defaultTheme.fontFamily.sans
+                ],
+    			display: [
+    				'"Plus Jakarta Sans"',
     				'Figtree',
                     ...defaultTheme.fontFamily.sans
                 ]
+    		},
+    		boxShadow: {
+    			card: '0 1px 2px hsl(var(--foreground) / 0.06), 0 1px 3px hsl(var(--foreground) / 0.10)',
+    			lift: '0 8px 24px -6px hsl(var(--foreground) / 0.18)'
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
@@ -37,6 +47,26 @@ export default {
     			primary: {
     				DEFAULT: 'hsl(var(--primary))',
     				foreground: 'hsl(var(--primary-foreground))'
+    			},
+    			'primary-soft': 'hsl(var(--primary-soft))',
+    			'primary-strong': 'hsl(var(--primary-strong))',
+    			success: {
+    				DEFAULT: 'hsl(var(--success))',
+    				foreground: 'hsl(var(--success-foreground))',
+    				soft: 'hsl(var(--success-soft))',
+    				strong: 'hsl(var(--success-strong))'
+    			},
+    			warning: {
+    				DEFAULT: 'hsl(var(--warning))',
+    				foreground: 'hsl(var(--warning-foreground))',
+    				soft: 'hsl(var(--warning-soft))',
+    				strong: 'hsl(var(--warning-strong))'
+    			},
+    			info: {
+    				DEFAULT: 'hsl(var(--info))',
+    				foreground: 'hsl(var(--info-foreground))',
+    				soft: 'hsl(var(--info-soft))',
+    				strong: 'hsl(var(--info-strong))'
     			},
     			secondary: {
     				DEFAULT: 'hsl(var(--secondary))',

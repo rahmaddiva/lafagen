@@ -244,16 +244,24 @@ di config, kelas seperti `bg-primary-soft`, `text-success`, atau `bg-warning` ak
 'primary-strong':'hsl(var(--primary-strong))',
 success: { DEFAULT: 'hsl(var(--success))',
            foreground: 'hsl(var(--success-foreground))',
-           soft: 'hsl(var(--success-soft))' },
+           soft: 'hsl(var(--success-soft))',
+           strong: 'hsl(var(--success-strong))' },
 warning: { DEFAULT: 'hsl(var(--warning))',
            foreground: 'hsl(var(--warning-foreground))',
-           soft: 'hsl(var(--warning-soft))' },
+           soft: 'hsl(var(--warning-soft))',
+           strong: 'hsl(var(--warning-strong))' },
 info:    { DEFAULT: 'hsl(var(--info))',
            foreground: 'hsl(var(--info-foreground))',
-           soft: 'hsl(var(--info-soft))' },
+           soft: 'hsl(var(--info-soft))',
+           strong: 'hsl(var(--info-strong))' },
 // chart-1..5 sudah ada di config dan tetap dipertahankan;
 // yang berubah hanya nilainya di app.css (§4.3).
 ```
+
+**Konvensi penamaan (penting):** `-foreground` = teks di atas **DEFAULT** (pola yang
+sama dengan `primary-foreground` dan `destructive-foreground` yang sudah ada).
+Teks di atas `-soft` memakai **`-strong`**. Keduanya tidak boleh tertukar: memakai
+`text-success-foreground` di atas `bg-success` menghasilkan **1,78:1**.
 
 Catatan: `chart-3..5` sudah terpetakan di config, jadi yang perlu diperbaiki untuk
 chart hanyalah nilai variabelnya — bukan pemetaannya.

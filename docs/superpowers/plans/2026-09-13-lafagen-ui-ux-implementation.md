@@ -101,19 +101,31 @@ memperbaiki 8 temuan audit, tanpa mengubah alur bisnis, skema data, atau otorisa
    }
    ```
 
-   **d. Token status di `:root`** (dipakai badge/delta; nilai literal, semua lolos):
+   **d. Token status di `:root`** (dipakai badge/delta; nilai literal, semua lolos).
+   **Perhatikan konvensi penamaan:** `-foreground` berarti **teks di atas DEFAULT**
+   (sama seperti `primary-foreground`/`destructive-foreground`), sedangkan teks di
+   atas `-soft` memakai **`-strong`**:
 
    ```css
    --success: 142 71% 30%;          /* 4,83:1 vs putih */
-   --success-foreground: 142 72% 20%;
-   --success-soft: 138 76% 95%;     /* fg di atas soft: 8,02:1 */
+   --success-foreground: 0 0% 100%; /* teks putih DI ATAS success */
+   --success-soft: 138 76% 95%;
+   --success-strong: 142 72% 20%;   /* teks DI ATAS success-soft: 8,02:1 */
    --warning: 32 95% 33%;           /* 5,24:1 vs putih */
-   --warning-foreground: 32 95% 22%;
-   --warning-soft: 48 96% 92%;      /* fg di atas soft: 8,43:1 */
+   --warning-foreground: 0 0% 100%;
+   --warning-soft: 48 96% 92%;
+   --warning-strong: 32 95% 22%;    /* di atas soft: 8,43:1 */
    --info: 217 91% 42%;             /* 6,64:1 vs putih */
-   --info-foreground: 217 91% 28%;
-   --info-soft: 214 95% 94%;        /* fg di atas soft: 9,26:1 */
+   --info-foreground: 0 0% 100%;
+   --info-soft: 214 95% 94%;
+   --info-strong: 217 91% 28%;      /* di atas soft: 9,26:1 */
    ```
+
+   **Jangan** memakai `text-success-foreground` di atas `bg-success` dengan maksud
+   "teks gelap di atas hijau" — bentuk lama itu menghasilkan **1,78:1** (gagal
+   total). Pola yang benar:
+   `bg-success text-success-foreground` (putih di hijau) **atau**
+   `bg-success-soft text-success-strong` (hijau tua di tint). Idem warning/info.
 
    **Catatan penting:** `success` pada `142 71% 33%` dan `warning` pada `38 92% 34%`
    **GAGAL** AA (4,11:1 dan 4,40:1). Jangan "membulatkan" nilai di atas ke angka
