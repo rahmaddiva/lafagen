@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { ImagePlus, Loader2, Trash2, UploadCloud, X } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 
@@ -101,6 +101,12 @@ function removeExisting(photo) {
 function dismissRejected() {
     rejected.value = [];
 }
+
+// Blob URL yang masih tersisa saat halaman ditinggalkan (mis. batal setelah
+// pilih file) harus dilepas — tanpa ini memori bertahan sampai tab ditutup.
+onBeforeUnmount(() => {
+    previews.value.forEach((p) => URL.revokeObjectURL(p.url));
+});
 </script>
 
 <template>
