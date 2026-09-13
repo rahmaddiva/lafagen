@@ -122,6 +122,10 @@ Windows tidak peka huruf besar/kecil sehingga lolos; pada server Linux
 peka huruf besar/kecil: `grep -rn "@/Components/" resources/js` → **0 hasil**
 (`ls -d` tidak bermakna di filesystem yang tidak peka huruf besar/kecil).
 
+Ini **murni penulisan ulang jalur impor** — tidak ada direktori yang di-rename.
+`docs/superpowers/plans/2026-09-10-lafagen-implementation.md:1331` juga menyebut
+`resources/js/Components/`; itu catatan historis dan **tidak diubah**.
+
 ### 3.7 Paginasi bukan tautan
 
 `Reports/Index.vue` merender paginasi sebagai `<Button … @click="router.get(...)"
@@ -170,28 +174,41 @@ Diukur di mesin ini: `fonts.googleapis.com` merespons `200` dalam **0,48 s**
 
 ### 4.3 Token warna — angka kontras terverifikasi
 
-Nilai dipilih dengan menghitung rasio kontras WCAG terhadap putih. **Catatan penting:
-perkiraan awal `--primary` FAD pada `L=30%` menghasilkan 4,14:1 dan GAGAL AA** untuk
-teks normal; karena itu nilai diturunkan sampai lolos.
+**PENTING — koreksi terhadap draf awal spec ini.** Draf pertama memakai
+`FAD 168 84% 30%` dan `GENRE 210 100% 42%`, dan menyimpulkan FAD gagal AA
+(4,14:1). Nilai itu **tidak pernah ada di repo** — itu angka yang saya tulis dari
+ingatan. Nilai yang benar-benar dipakai `app.css` adalah:
 
-| Token | FAD | GENRE | Kontras vs putih |
+| Token | FAD (sudah ada) | GENRE (sudah ada) | Kontras vs putih |
 |---|---|---|---|
-| `--primary` | `168 84% 27%` | `210 100% 42%` | **4,94:1** / **5,15:1** — lolos AA |
-| `--primary-foreground` | `0 0% 100%` | `0 0% 100%` | — |
-| `--primary-soft` | `168 84% 94%` | `210 100% 94%` | primary di atas soft: **4,63:1** / **4,79:1** |
-| `--primary-strong` | `168 84% 18%` | `210 100% 26%` | untuk teks di atas soft |
+| `--primary` | `166 75% 28%` | `205 90% 40%` | **5,07:1** / **4,84:1** — **sudah lolos AA** |
+| `--accent-foreground` di atas `--accent` | `166 75% 18%` / `162 73% 92%` | `205 90% 30%` / `204 94% 93%` | **8,44:1** / **6,41:1** |
 
-Blok `public` (baru, untuk Landing):
+Karena palet yang ada **sudah lolos AA**, desain ulang ini **mempertahankan nilai
+`--primary` dan `--accent` yang sekarang** — tidak ada alasan mengubah warna yang
+sudah benar. Perubahan token murni bersifat **aditif**.
+
+Yang ditambahkan (aditif, dengan rasio terhitung):
+
+| Token baru | FAD | GENRE | Catatan |
+|---|---|---|---|
+| `--primary-soft` | `162 73% 92%` (samakan dgn `--accent` yang ada) | `204 94% 93%` | latar chip/nav aktif |
+| `--primary-strong` | `166 75% 18%` (= `--accent-foreground`) | `205 90% 30%` | teks di atas soft |
+| `--chart-3` | keluarga teal/emerald | keluarga biru/indigo | **memperbaiki §3.2** |
+| `--chart-4` | keluarga teal | keluarga biru | **memperbaiki §3.2** |
+| `--chart-5` | keluarga lime | keluarga sky | **memperbaiki §3.2** |
+| `--success`, `--warning`, `--info` (+ `-soft`, `-foreground`) | netral, sama utk kedua komunitas | idem | untuk badge/delta |
+
+Blok `public` (baru, untuk Landing) memakai netral Lafagen — dipilih agar tidak
+berkompetisi dengan warna komunitas:
 
 ```css
-[data-community='public'], :root { /* brand netral Lafagen */ }
+[data-community='public'] {
+  --primary: 240 5.9% 10%;        /* netral gelap, sama seperti :root */
+  --primary-foreground: 0 0% 98%;
+  --chart-1..5: <skala netral>;
+}
 ```
-
-Token tambahan (semua per komunitas): `--success`, `--warning`, `--info`
-(+ varian `-soft` dan `-foreground`), dan **`--chart-3`, `--chart-4`, `--chart-5`
-yang kini di-override per komunitas** — memperbaiki temuan §3.2. Palet chart per
-komunitas tetap satu keluarga warna (FAD: teal→emerald→lime; GENRE: blue→sky→indigo)
-sehingga donut terbaca sebagai satu identitas.
 
 Token `.dark` disinkronkan agar tidak ada variabel yang hilang, **tanpa** verifikasi
 kontras (kode mati, §3.5).
@@ -277,13 +294,24 @@ ring-offset-2` yang konsisten di semua elemen interaktif.
 | `StatCard.vue` | tulis ulang | Chip ikon Lucide, angka `tabular-nums`, badge delta vs bulan lalu, prop `tone` (primary/success/warning/info) |
 | `charts/MonthlyBar.vue` | tulis ulang | **SVG tetap**; tambah label sumbu X/Y, teks nilai, tooltip HTML saat hover **dan** focus keyboard, penanda bulan berjalan, animasi `grow`, tabel `sr-only` sebagai fallback a11y |
 | `charts/CategoryDonut.vue` | tulis ulang | Palet dari `--chart-*` (hapus 3 hex hardcoded, perbaiki §3.2), legenda + persen + jumlah, hover irisan, total di tengah |
-| `ActivityPanel.vue` | baru | Hari ini / minggu ini / bulan ini + streak (angka + ikon, **tanpa** progress bar) + linimasa laporan terbaru |
+| `ActivityPanel.vue` | baru | Hari ini / minggu ini / bulan ini + streak (angka + ikon, **tanpa** progress bar). **Tidak** memuat linimasa laporan terbaru — daftar itu milik bloknya sendiri (§7.3) agar tidak dirender dua kali |
 | `ReportCard.vue` | baru | Kartu mobile: badge kategori, judul, lokasi, tanggal, pelapor |
 | `BottomNav.vue`, `NavItem.vue` | baru | Navigasi mobile (§5.2) |
 | `EmptyState.vue` | tulis ulang | Ikon, judul, deskripsi, aksi; varian per konteks |
 | `Skeleton.vue` | baru | Placeholder saat memuat |
 | `PhotoUploader.vue` | tulis ulang | Dropzone drag-and-drop, hitungan `n/10`, validasi tipe/ukuran per file, tombol hapus pakai ikon Lucide (mengganti glyph `✕`) |
 | `ui/badge` | perluas | Varian `success`/`warning`/`info` + gaya pill |
+
+**Aturan lokasi & impor (wajib, berlaku untuk SEMUA komponen baru di atas):**
+
+- Setiap komponen baru/komponen yang ditulis ulang diletakkan di
+  **`resources/js/components/`** (huruf kecil) — termasuk `charts/*`.
+- Setiap impor baru memakai **`@/components/`**, bukan `@/Components/`.
+- Perbaikan §3.6 hanya menjangkau 5 impor yang sudah ada; tanpa aturan ini,
+  `@/Components/…` akan **muncul kembali** bersama setiap file baru dan bug build
+  Linux kembali tanpa terasa. Karena itu pemeriksaan
+  `grep -rn "@/Components/" resources/js` → **0 hasil** dilakukan **per halaman**
+  (§9), bukan hanya sekali di akhir.
 
 ## 7. Halaman
 
@@ -294,7 +322,9 @@ ring-offset-2` yang konsisten di semua elemen interaktif.
    `autocomplete` yang benar.
 3. **Dashboard** — hero sapaan (ikon, bukan emoji) + tanggal Indonesia + chip
    komunitas; pemilih tahun jadi segmented control; 4 stat card ber-ikon + tren;
-   baris chart (bar + donut); `ActivityPanel`; **5 laporan terbaru tetap baris teks**.
+   baris chart (bar + donut); `ActivityPanel` (angka aktivitas + streak saja); lalu
+   blok **"5 laporan terbaru"** sebagai baris teks sederhana — blok ini berdiri
+   sendiri dan **tidak** berada di dalam `ActivityPanel` (§6).
 4. **Laporan Index** — `PageHeader` + aksi; filter dilipat di mobile (chip ringkas),
    selalu terbuka di desktop; **tabel ≥768px, kartu <768px** dari satu markup;
    paginasi jadi `<Link>` sungguhan (perbaiki §3.7); hitungan hasil.
@@ -345,6 +375,9 @@ terpenuhi karena perubahan hanya **menambah** kunci. `HealthTest`/`AuthTest` men
 2. Test baru **hanya** untuk perhitungan `streak` (logika yang benar-benar bisa salah:
    batas bulan, bulan berjalan, bulan kosong di tengah). Ditulis merah dulu.
 3. `npm run build` sukses — sekaligus membuktikan perbaikan casing §3.6.
+   **Selain itu, `grep -rn "@/Components/" resources/js` → 0 hasil diperiksa per
+   halaman** setelah tiap halaman selesai, bukan hanya di akhir, agar impor
+   kapitalisasi tidak menyelinap masuk bersama komponen baru (§6).
 4. Pemeriksaan nyata di browser pada 375 / 768 / 1024 / 1440 px: tidak ada overflow
    horizontal, bottom nav tidak menutupi konten, urutan Tab logis, kontras teks,
    lightbox, dan upload foto.
