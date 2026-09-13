@@ -7,7 +7,8 @@ dua tema/area terpisah, data antar komunitas terisolasi.
 ## Fitur
 
 - Landing pemilihan komunitas dengan statistik tiap komunitas; halaman login dua
-  panel bertema (FAD hijau-teal, GENRE biru).
+  panel bertema (FAD hijau-teal; GENRE Oxford Blue `#042948` + Pale Peach `#fde5a9`
+  sesuai warna logonya).
 - Navigasi responsif: sidebar ber-ikon di desktop, bottom bar dengan FAB tengah di
   ponsel (termasuk Kategori & Pengguna untuk admin).
 - CRUD laporan proker: judul, kategori, tanggal mulai/selesai, lokasi, deskripsi,

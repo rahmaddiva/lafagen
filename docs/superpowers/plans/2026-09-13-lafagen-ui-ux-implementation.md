@@ -60,6 +60,13 @@ memperbaiki 8 temuan audit, tanpa mengubah alur bisnis, skema data, atau otorisa
    4,84:1). Spec awal saya sempat salah menyebut nilai lain; yang benar adalah nilai
    di repo. Perubahan bersifat **aditif**. **Pakai nilai literal berikut apa adanya**
    — semua sudah dihitung rasio kontrasnya:
+> **AMANDEMEN (2026-09-13, permintaan user):** semua nilai literal **GENRE** di
+> Tugas 1 ini sudah **usang** — palet diganti ke warna logo resmi: `--primary`/
+> `--ring` `207 89% 15%` (Oxford Blue #042948), `--primary-strong` `207 89% 10%`,
+> `--primary-soft` `43 95% 83%` (Pale Peach #fde5a9), `--accent` `43 95% 90%`,
+> `--accent-foreground` `207 89% 12%`, dan `--chart-1..5`
+> `207 89% 30%` · `43 95% 70%` · `207 55% 52%` · `43 95% 83%` · `207 40% 68%`.
+> Nilai **FAD tidak berubah**. Lihat spec §4.3 "Amandemen" untuk rasio terhitung.
 
    **a. `--primary-soft` / `--primary-strong`** (ditambahkan ke blok komunitas yang ada):
 
@@ -154,7 +161,7 @@ memperbaiki 8 temuan audit, tanpa mengubah alur bisnis, skema data, atau otorisa
   cs.getPropertyValue('--chart-4').trim();  // harus "172 55% 59%"
   cs.getPropertyValue('--chart-5').trim();  // harus "150 48% 46%"
   // di /genre/dashboard
-  cs.getPropertyValue('--chart-3').trim();  // harus "212 80% 33%"
+  cs.getPropertyValue('--chart-3').trim();  // harus "207 55% 52%" (amandemen: navy tengah)
   ```
   Nilai `197 37% 24%` (bawaan lama) **tidak boleh** muncul di kedua komunitas.
 - Probe `--primary` di `/fad/dashboard` harus tetap `166 75% 28%` (membuktikan
@@ -336,7 +343,7 @@ dari HP).
   await tab.click('a[href="/fad/login"]');
   // harus: dataset.community === 'fad' dan --primary === '166 75% 28%'
   await tab.click('a[href="/genre/login"]');   // dari / lagi
-  // harus: dataset.community === 'genre' dan --primary === '205 90% 40%'
+  // harus: dataset.community === 'genre' dan --primary === '207 89% 15%' (amandemen)
   ```
   Full page load (`tab.goto`) merender ulang blade dan **selalu** lolos, sehingga
   tidak mendeteksi bug ini sama sekali.
@@ -400,8 +407,8 @@ dari HP).
   // juga TIDAK boleh ada hex hardcoded lama: #65a30d | #ca8a04 | #dc2626
   ```
   Di `/fad/dashboard` warna irisan ke-3 harus `168 66% 27%`; di `/genre/dashboard`
-  harus `212 80% 33%`. Tambahkan `data-donut-slice` pada `<path>` donut agar
-  pemeriksaan ini mungkin.
+  harus `207 55% 52%` (amandemen palet Oxford/Peach). Tambahkan `data-donut-slice`
+  pada `<path>` donut agar pemeriksaan ini mungkin.
 - Tooltip bar chart muncul saat **keyboard** fokus, bukan hanya hover.
 - Daftar "5 laporan terbaru" muncul **tepat satu kali** di DOM (membuktikan
   kontradiksi §6/§7.3 benar-benar terselesaikan).

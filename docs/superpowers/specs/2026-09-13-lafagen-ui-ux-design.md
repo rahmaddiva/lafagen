@@ -254,6 +254,25 @@ dihitung dan lolos AA. Nilai literal lengkap ada di rencana implementasi Tugas 1
 langkah 4 — **jangan dibulatkan ke nilai yang lebih terang**, dua kandidat terang
 (`success 142 71% 33%`, `warning 38 92% 34%`) gagal AA.
 
+**Amandemen 2026-09-13 (user request) — palet GENRE diganti.** Nilai lama
+`205 90% 40%` (biru cerah) diganti warna resmi logo GENRE: **Oxford Blue
+`#042948` = `207 89% 15%`** dan **Pale Peach `#fde5a9` = `43 95% 83%`**. Blok
+`[data-community='genre']` kini:
+
+| Token | Nilai baru | Peran |
+|---|---|---|
+| `--primary` / `--ring` | `207 89% 15%` | aksi, tombol (teks putih 14,7:1) |
+| `--primary-strong` | `207 89% 10%` | teks di atas soft |
+| `--primary-soft` | `43 95% 83%` | chip/nav aktif (latar peach) |
+| `--accent` / `--accent-foreground` | `43 95% 90%` / `207 89% 12%` | hover |
+| `--chart-1..5` | `207 89% 30%` · `43 95% 70%` · `207 55% 52%` · `43 95% 83%` · `207 40% 68%` | selang-seling navy↔peach |
+
+Semua pasangan teks/latar terverifikasi ulang ≥ 13:1. Karena peach dan navy
+muda berdekatan pada sebagian pasangan irisan donut, `CategoryDonut` kini
+memberi tiap irisan `stroke` warna `--card` 2px (pemisah visual). **Angka
+`212 80% 33%` dan `205 90% 40%` yang disebut di §4.3 dan rencana Tugas 1/6
+di atas kini usang untuk GENRE — nilai FAD tidak berubah.**
+
 Blok `public` (baru, untuk Landing) memakai netral Lafagen — dipilih agar tidak
 berkompetisi dengan warna komunitas:
 

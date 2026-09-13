@@ -93,6 +93,8 @@ const centerLabel = computed(() => {
                 :data-donut-slice="s.name"
                 :d="arc(110, 110, 95, 58, s.a0, s.a1)"
                 :fill="s.fill"
+                stroke="hsl(var(--card))"
+                stroke-width="2"
                 class="donut-slice transition-opacity"
                 :opacity="hovered === null || hovered === s.name ? 1 : 0.4"
                 tabindex="0"
