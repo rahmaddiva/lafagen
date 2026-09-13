@@ -55,7 +55,7 @@ class DashboardController extends Controller
                 'category_name' => $r->category->name,
                 'start_date' => $r->start_date->format('Y-m-d'),
                 'user_name' => $r->user->name,
-                'created_ago' => $r->created_at->diffForHumans(),
+                'created_ago' => $r->created_at->locale('id')->diffForHumans(),
             ])->all();
 
         return Inertia::render('Dashboard', [
