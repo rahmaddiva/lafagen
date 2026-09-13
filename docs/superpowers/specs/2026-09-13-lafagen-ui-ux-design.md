@@ -1,0 +1,335 @@
+# Lafagen — Desain Ulang UI/UX (Gaya "Energik Sporty")
+
+Tanggal: 2026-09-13
+Status: Disetujui user (brainstorming 7 putaran)
+Prasyarat: `docs/superpowers/specs/2026-09-10-lafagen-design.md` (desain sistem fungsional)
+Lokasi proyek: `D:/laragon/www/laravel/lafagen`
+
+## 1. Ringkasan & Sasaran
+
+Aplikasi Lafagen sudah berfungsi penuh (45 test hijau) tetapi tampilannya masih
+default shadcn-vue: radius `0.5rem`, abu-abu netral, satu font, sidebar hanya untuk
+desktop, dan tabel lebar di semua ukuran layar. Sasaran pengguna adalah **anak
+komunitas dan remaja** (FAD & GENRE Kab. Tanah Laut), yang hampir seluruhnya membuka
+aplikasi dari ponsel.
+
+Desain ulang ini menetapkan satu arah visual — **Energik Sporty**: kontras tinggi,
+tipografi besar dan tebal, aksen pekat, sudut sedang, shadow tegas, transisi cepat —
+lalu menerapkannya ke seluruh halaman. Identitas per komunitas tetap **hanya** warna
+token + logo (struktur, radius, shadow, dan tipografi identik untuk FAD dan GENRE).
+
+Bukan sasaran: fitur baru, perubahan alur bisnis, perubahan otorisasi, atau
+penambahan pustaka grafik.
+
+## 2. Keputusan yang Disetujui User
+
+| # | Pertanyaan | Pilihan user |
+|---|---|---|
+| 1 | Arah visual | **Energik Sporty** |
+| 2 | Identitas FAD vs GENRE | **Token warna + logo saja** |
+| 3 | Navigasi mobile | **Bottom tab bar + sidebar desktop** |
+| 4 | Komponen dashboard | **Chart diperbaiki, stat card ber-ikon + tren, panel aktivitas/streak, greeting hero** — 4 dari 7 opsi |
+| 5 | Pola daftar | **Tabel di desktop, kartu di mobile** |
+| 6 | Cakupan | **Semua halaman, satu putaran** |
+| 7 | Sumber data dashboard | **Hitung dari data yang sudah ada** (tanpa migrasi) |
+| 8 | Animasi | **Transisi halus + animasi masuk** (CSS saja) |
+| 9 | Tipografi | **Plus Jakarta Sans** |
+| 10 | Cara memuat font | **Google Fonts `<link>`** (+ preconnect, `display=swap`) |
+| 11 | Blok `.dark` (kode mati) | **Sinkronkan token `.dark`, tanpa verifikasi kontras** |
+
+### Secara eksplisit TIDAK termasuk
+
+Tiga opsi dashboard yang **tidak** dipilih user, dan satu opsi yang tidak dipilih
+tetapi sempat masuk draf desain ini (dicatat agar tidak diam-diam kembali):
+
+- ❌ **Goal / progress bulan ini** — tidak dipilih. Tidak ada konsep target/goal,
+  tidak ada komponen progress bar, tidak ada penambahan config target.
+- ❌ **Laporan terbaru jadi kartu + thumbnail** — tidak dipilih. Daftar "5 laporan
+  terbaru" tetap baris teks sederhana; tidak ada `photo_url` di props `recent`.
+- ❌ **Dark mode lolos kontras** — tidak dipilih. `.dark` tidak dapat diaktifkan
+  (lihat §3.5), jadi tidak ada anggaran verifikasi kontras untuknya.
+- ❌ **Pustaka grafik baru** — `package.json` tidak punya pustaka chart. Chart tetap
+  SVG tulis-tangan; perbaikan bersifat aditif.
+
+## 3. Temuan Audit (kondisi awal, terverifikasi)
+
+Semua temuan di bawah diverifikasi langsung dari repo/mesin ini, bukan dugaan.
+
+### 3.1 Font tidak pernah dimuat — bug nyata
+
+`tailwind.config.js:17` mendeklarasikan `Figtree` di `fontFamily.sans`, tetapi:
+`grep -rn "Figtree|fonts.googleapis|fonts.bunny"` pada `app.blade.php`, `app.css`,
+`app.js`, dan `vite.config.js` → **0 hasil**. Tidak ada `@import`, tidak ada `<link>`,
+tidak ada paket `@fontsource`. Probe DOM mengembalikan
+`Figtree, ui-sans-serif, system-ui, …` sehingga halaman **benar-benar dirender dengan
+font sistem** (Segoe UI di Windows).
+
+Konsekuensi: mengubah `fontFamily.sans` menjadi `'Plus Jakarta Sans'` saja akan
+mereproduksi bug yang sama. Perlu jalur pemuatan nyata.
+
+### 3.2 Palet donut memakai token yang tidak di-override
+
+`resources/css/app.css:27-29` mendefinisikan `--chart-3/4/5` hanya pada `:root`
+(`197 37% 24%`, `43 74% 66%`, `27 87% 67%`). Blok `[data-community='fad']` dan
+`[data-community='genre']` **hanya** meng-override `--chart-1` dan `--chart-2`.
+`CategoryDonut.vue` memakai palet 8 warna (`--primary`, `--chart-2` … `--chart-5`,
+lalu 3 hex hardcoded `#65a30d`, `#ca8a04`, `#dc2626`). Dengan 6 kategori per
+komunitas, irisan ke-3 dan seterusnya tampil dengan warna navy/oranye/kuning bawaan
+shadcn — **tidak sesuai tema komunitas mana pun**.
+
+### 3.3 Halaman Landing tidak memakai token sama sekali
+
+`app.blade.php:2` menetapkan `data-community` dari `props.community.key` dengan
+fallback `'public'`. `HandleInertiaRequests::share()` mengembalikan `null` untuk
+tamu, sehingga Landing dirender dengan `[data-community='public']` — dan **tidak ada
+blok CSS untuk `public`**. Namun Landing juga tidak membaca token apa pun: seluruh
+warnanya hardcoded (`slate-*`, `teal-*`, `sky-*`). Jadi ini bukan tema rusak,
+melainkan **permukaan yang belum bertoken**. Setelah desain ulang (yang memakai
+token), celah `public` ini akan mulai terlihat — karena itu blok brand `public`
+wajib ditambahkan lebih dulu.
+
+### 3.4 Navigasi mobile tidak lengkap — bug akses
+
+`CommunityLayout.vue` menyembunyikan sidebar pada `<768px` (`hidden … md:flex`).
+Penggantinya di header hanya berisi tiga tautan teks: `Dashboard`, `Laporan`, dan
+tombol `Keluar`. Akibatnya **admin komunitas tidak dapat membuka halaman Kategori
+dan Pengguna dari ponsel** — dua halaman itu hanya ada di sidebar desktop.
+
+### 3.5 Dark mode adalah kode mati
+
+`tailwind.config.js` menyetel `darkMode: ['class']` dan `app.css` punya blok `.dark`,
+tetapi `grep` untuk sakelar tema / `prefers-color-scheme` / `class="dark"` di seluruh
+`resources/js` dan `resources/views` → **0 hasil**. Tidak ada cara mengaktifkan dark
+mode. Kontras dark mode karena itu **tidak dapat diobservasi**, sehingga tidak masuk
+anggaran verifikasi (sesuai keputusan #11: token disinkronkan agar tidak rusak).
+
+### 3.6 Inkonsistensi kapitalisasi direktori — gagal build di Linux
+
+Direktori nyata: `resources/js/components/` (huruf kecil). Impor memakai huruf besar:
+
+- `Dashboard.vue` → `@/Components/StatCard.vue`, `@/Components/charts/MonthlyBar.vue`
+- `Reports/Index.vue` → `@/Components/EmptyState.vue`
+- `Reports/Form.vue` → `@/Components/PhotoUploader.vue`
+
+Windows tidak peka huruf besar/kecil sehingga lolos; pada server Linux
+(case-sensitive) `npm run build` **gagal**. Harus dinormalisasi ke `@/components/`.
+
+### 3.7 Paginasi bukan tautan
+
+`Reports/Index.vue` merender paginasi sebagai `<Button … @click="router.get(...)"
+v-html="link.label">`. Karena bukan `<a>`, tautan tidak bisa dibuka di tab baru,
+tidak bisa disalin, dan tidak terindeks. Label juga di-`v-html` mentah.
+
+### 3.8 Dashboard: 12 kueri dalam satu loop
+
+`DashboardController::index()` menjalankan `Report::filtered($community, ['year'=>$year,
+'month'=>$m])->count()` untuk `$m = 1..12` — **12 kueri terpisah** hanya untuk data
+grafik batang. Data yang sama dapat diambil dengan satu `GROUP BY MONTH(start_date)`.
+
+## 4. Sistem Token & Tipografi
+
+### 4.1 Pemuatan font
+
+`resources/views/app.blade.php` `<head>`, sebelum `@vite`:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+```
+
+`tailwind.config.js`:
+
+```js
+fontFamily: {
+    sans: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],
+    display: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],
+},
+```
+
+Diukur di mesin ini: `fonts.googleapis.com` merespons `200` dalam **0,48 s**
+(dibanding `registry.npmjs.org` **1,30 s** untuk alternatif self-host). Alternatif
+`@fontsource-variable/plus-jakarta-sans` ditolak karena menambah dependensi build
+~1–2 MB demi aset kosmetik, dan jalur CDN sudah cukup cepat di lingkungan ini.
+
+### 4.2 Radius & shadow
+
+`--radius: 0.5rem` → **`0.75rem`** (sudut sedang; `lg/md/sm` mengikuti otomatis).
+
+`tailwind.config.js` `boxShadow`:
+- `card` — `0 1px 2px hsl(var(--foreground) / 0.06), 0 1px 3px hsl(var(--foreground) / 0.10)`
+- `lift` — `0 8px 24px -6px hsl(var(--foreground) / 0.18)` (dipakai saat hover)
+
+### 4.3 Token warna — angka kontras terverifikasi
+
+Nilai dipilih dengan menghitung rasio kontras WCAG terhadap putih. **Catatan penting:
+perkiraan awal `--primary` FAD pada `L=30%` menghasilkan 4,14:1 dan GAGAL AA** untuk
+teks normal; karena itu nilai diturunkan sampai lolos.
+
+| Token | FAD | GENRE | Kontras vs putih |
+|---|---|---|---|
+| `--primary` | `168 84% 27%` | `210 100% 42%` | **4,94:1** / **5,15:1** — lolos AA |
+| `--primary-foreground` | `0 0% 100%` | `0 0% 100%` | — |
+| `--primary-soft` | `168 84% 94%` | `210 100% 94%` | primary di atas soft: **4,63:1** / **4,79:1** |
+| `--primary-strong` | `168 84% 18%` | `210 100% 26%` | untuk teks di atas soft |
+
+Blok `public` (baru, untuk Landing):
+
+```css
+[data-community='public'], :root { /* brand netral Lafagen */ }
+```
+
+Token tambahan (semua per komunitas): `--success`, `--warning`, `--info`
+(+ varian `-soft` dan `-foreground`), dan **`--chart-3`, `--chart-4`, `--chart-5`
+yang kini di-override per komunitas** — memperbaiki temuan §3.2. Palet chart per
+komunitas tetap satu keluarga warna (FAD: teal→emerald→lime; GENRE: blue→sky→indigo)
+sehingga donut terbaca sebagai satu identitas.
+
+Token `.dark` disinkronkan agar tidak ada variabel yang hilang, **tanpa** verifikasi
+kontras (kode mati, §3.5).
+
+### 4.4 Tipografi & skala
+
+| Peran | Kelas | Catatan |
+|---|---|---|
+| Page title | `text-2xl md:text-3xl font-extrabold tracking-tight` | dulu `text-xl font-bold` |
+| Section | `text-base font-bold` | |
+| Statistik | `text-3xl md:text-4xl font-extrabold tabular-nums` | `tabular-nums` mencegah angka bergoyang |
+| Body | `text-sm` | |
+| Meta | `text-xs text-muted-foreground` | |
+
+### 4.5 Motion
+
+Keyframes `rise` (translateY 8px + opacity), `pop` (scale 0.96→1), `grow` (scaleY 0→1
+untuk bar chart). Durasi 150–250 ms, easing `cubic-bezier(0.16, 1, 0.3, 1)`. Semua
+dibungkus `motion-safe:`; `@media (prefers-reduced-motion: reduce)` mematikan seluruh
+animasi dan transisi.
+
+## 5. Layout & Navigasi
+
+### 5.1 Desktop (≥768px)
+
+Sidebar `w-64` tetap: ikon Lucide per item, indikator aktif berupa bar aksen kiri +
+latar `--primary-soft`, chip komunitas (logo + nama), kartu pengguna (avatar inisial,
+nama, badge peran) di bagian bawah.
+
+### 5.2 Mobile (<768px) — `BottomNav.vue`
+
+Fixed bottom, `pb-[env(safe-area-inset-bottom)]`, target sentuh ≥44 px, ikon + label
+10 px, item aktif berwarna `--primary`.
+
+| Peran | Item |
+|---|---|
+| `anggota` | Dashboard · Laporan · **Tambah** (FAB tengah) · Profil |
+| `admin` | Dashboard · Laporan · **Tambah** · Kategori · Pengguna |
+
+**Kriteria penerimaan wajib:**
+1. `padding-bottom: env(safe-area-inset-bottom)` pada bar.
+2. `<main>` mendapat `pb-24 md:pb-6` sehingga konten tidak tertutup bar.
+3. Tab khusus admin **disembunyikan** untuk `anggota` — grid 3 vs 5 item, bukan sel
+   kosong.
+4. Halaman Kategori & Pengguna **dapat dijangkau** dari ponsel oleh admin
+   (memperbaiki §3.4).
+
+Header mobile: judul + tombol menu/avatar (nama, peran, Keluar) menggantikan tiga
+tautan teks. Ditambah skip-link "Lewati ke konten" dan `focus-visible:ring-2
+ring-offset-2` yang konsisten di semua elemen interaktif.
+
+## 6. Komponen
+
+| Komponen | Status | Isi |
+|---|---|---|
+| `PageHeader.vue` | baru | Judul, subjudul, slot aksi — dipakai semua halaman |
+| `StatCard.vue` | tulis ulang | Chip ikon Lucide, angka `tabular-nums`, badge delta vs bulan lalu, prop `tone` (primary/success/warning/info) |
+| `charts/MonthlyBar.vue` | tulis ulang | **SVG tetap**; tambah label sumbu X/Y, teks nilai, tooltip HTML saat hover **dan** focus keyboard, penanda bulan berjalan, animasi `grow`, tabel `sr-only` sebagai fallback a11y |
+| `charts/CategoryDonut.vue` | tulis ulang | Palet dari `--chart-*` (hapus 3 hex hardcoded, perbaiki §3.2), legenda + persen + jumlah, hover irisan, total di tengah |
+| `ActivityPanel.vue` | baru | Hari ini / minggu ini / bulan ini + streak (angka + ikon, **tanpa** progress bar) + linimasa laporan terbaru |
+| `ReportCard.vue` | baru | Kartu mobile: badge kategori, judul, lokasi, tanggal, pelapor |
+| `BottomNav.vue`, `NavItem.vue` | baru | Navigasi mobile (§5.2) |
+| `EmptyState.vue` | tulis ulang | Ikon, judul, deskripsi, aksi; varian per konteks |
+| `Skeleton.vue` | baru | Placeholder saat memuat |
+| `PhotoUploader.vue` | tulis ulang | Dropzone drag-and-drop, hitungan `n/10`, validasi tipe/ukuran per file, tombol hapus pakai ikon Lucide (mengganti glyph `✕`) |
+| `ui/badge` | perluas | Varian `success`/`warning`/`info` + gaya pill |
+
+## 7. Halaman
+
+1. **Landing** — hero gradient bertoken, wordmark besar, dua kartu komunitas
+   (logo, jumlah anggota & laporan), hover lift, animasi masuk berurutan.
+2. **Login** — panel dua kolom: kiri gradient + logo + nama komunitas, kanan form;
+   target sentuh diperbesar, ringkasan error di atas form, `autofocus` +
+   `autocomplete` yang benar.
+3. **Dashboard** — hero sapaan (ikon, bukan emoji) + tanggal Indonesia + chip
+   komunitas; pemilih tahun jadi segmented control; 4 stat card ber-ikon + tren;
+   baris chart (bar + donut); `ActivityPanel`; **5 laporan terbaru tetap baris teks**.
+4. **Laporan Index** — `PageHeader` + aksi; filter dilipat di mobile (chip ringkas),
+   selalu terbuka di desktop; **tabel ≥768px, kartu <768px** dari satu markup;
+   paginasi jadi `<Link>` sungguhan (perbaiki §3.7); hitungan hasil.
+5. **Laporan Show** — hero judul + meta (kategori, tanggal, lokasi, pelapor), galeri
+   foto grid + lightbox yang sudah ada (dirapikan), kartu deskripsi, sidebar meta di
+   desktop.
+6. **Laporan Form** — tiga seksi bernomor (Informasi / Waktu & Lokasi / Dokumentasi),
+   penghitung karakter, action bar lengket di bawah pada mobile.
+7. **Kategori & Pengguna** — tabel di desktop, kartu di mobile; dialog dirapikan
+   (validasi inline, tombol ikon, `AlertDialog` untuk konfirmasi hapus); pengguna
+   pakai avatar inisial + badge peran.
+
+## 8. Perubahan Backend (minimal, tanpa migrasi)
+
+Hanya `DashboardController` dan route `/`. Tidak ada tabel/kolom baru.
+
+```php
+'stats' => [
+    'total_reports', 'total_members', 'this_month', 'this_year',
+    'prev_month',   // BARU — laporan bulan lalu, untuk badge delta
+],
+'activity' => [      // BARU — dihitung dari reports.start_date
+    'today', 'week', 'this_month', 'streak',
+],
+'recent' => [        // TIDAK berubah + created_ago
+    'id', 'title', 'category_name', 'start_date', 'user_name', 'created_ago',
+],
+```
+
+Definisi `streak`: jumlah bulan berurutan yang memiliki ≥1 laporan, dihitung mundur
+dari bulan berjalan; satu bulan kosong memutus rentetan.
+
+Optimasi: 12 kueri `$monthly` diganti satu
+`SELECT MONTH(start_date) AS m, COUNT(*) FROM reports WHERE community = ? AND
+YEAR(start_date) = ? GROUP BY m`, lalu diisi ke 12 slot (bulan tanpa data = 0).
+
+Route `/` (sekarang `Route::inertia('/')` tanpa data) menjadi closure yang mengirim
+`counts` per komunitas (anggota + laporan) untuk kartu Landing — 2 kueri agregat.
+
+Kontrak test: `DashboardTest` mengunci `stats.total_reports`, `stats.total_members`,
+`stats.this_year`, `monthly` (12 entri), dan `recent` (3 entri). Semua tetap
+terpenuhi karena perubahan hanya **menambah** kunci. `HealthTest`/`AuthTest` mengunci
+`component('Landing')` dan `community: null` — juga tetap terpenuhi.
+
+## 9. Verifikasi
+
+1. 45 test PHP tetap hijau (`php artisan test`).
+2. Test baru **hanya** untuk perhitungan `streak` (logika yang benar-benar bisa salah:
+   batas bulan, bulan berjalan, bulan kosong di tengah). Ditulis merah dulu.
+3. `npm run build` sukses — sekaligus membuktikan perbaikan casing §3.6.
+4. Pemeriksaan nyata di browser pada 375 / 768 / 1024 / 1440 px: tidak ada overflow
+   horizontal, bottom nav tidak menutupi konten, urutan Tab logis, kontras teks,
+   lightbox, dan upload foto.
+5. Bukti diambil sebagai pengukuran DOM (geometri, warna hasil komputasi, urutan
+   fokus) — **bukan** penilaian visual, karena model tidak dapat melihat gambar.
+   Screenshot disertakan sebagai artefak untuk ditinjau user.
+
+## 10. Risiko
+
+| Risiko | Mitigasi |
+|---|---|
+| Cakupan besar: 7 halaman + ~12 komponen | Fondasi token & komponen dulu, baru halaman; tiap halaman diverifikasi sebelum lanjut |
+| Token baru bisa lolos dari tema komunitas | Nilai kontras dihitung (§4.3); chart-3..5 kini di-override per komunitas |
+| Regresi pada test yang ada | Hanya penambahan kunci props; tidak ada penghapusan |
+| Kapitalisasi direktori hanya muncul saat build | `npm run build` masuk daftar verifikasi wajib (§9.3) |
+| Model tidak dapat menilai estetika secara visual | Keterbatasan dinyatakan eksplisit; screenshot diserahkan ke user untuk penilaian akhir |
+
+## 11. Catatan Drift Dokumen Lama
+
+Spec 2026-09-10 menyebut grafik memakai `recharts` dan "Inertia.js v1". Implementasi
+nyata memakai SVG tulis-tangan dan `inertia-laravel ^2.0`. Spec ini mengikuti
+implementasi nyata; dokumen lama tidak diubah di luar cakupan ini.
