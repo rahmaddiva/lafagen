@@ -29,10 +29,11 @@ const tagline = (c) => `Masuk sebagai anggota ${c.title}`;
             <h1
                 class="animate-rise mt-5 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl"
             >
-                Lafagen
+                LAFAGEN
             </h1>
             <p class="animate-rise mt-3 text-base text-muted-foreground sm:text-lg">
-                Sistem Laporan Program Kerja Komunitas
+                Laporan FAD dan GENRE Kabupaten Tanah Laut
+    
             </p>
 
             <div class="mt-12 grid gap-6 sm:grid-cols-2">
