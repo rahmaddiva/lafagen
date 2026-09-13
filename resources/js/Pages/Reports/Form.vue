@@ -8,7 +8,7 @@ import Label from '@/components/ui/label/Label.vue';
 import Textarea from '@/components/ui/textarea/Textarea.vue';
 import Select from '@/components/ui/select/Select.vue';
 import CommunityLayout from '@/Layouts/CommunityLayout.vue';
-import PhotoUploader from '@/Components/PhotoUploader.vue';
+import PhotoUploader from '@/components/PhotoUploader.vue';
 import { useCommunity } from '@/composables/useCommunity';
 
 const props = defineProps({

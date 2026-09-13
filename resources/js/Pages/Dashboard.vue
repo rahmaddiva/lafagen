@@ -6,9 +6,9 @@ import CardTitle from '@/components/ui/card/CardTitle.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
 import Select from '@/components/ui/select/Select.vue';
 import CommunityLayout from '@/Layouts/CommunityLayout.vue';
-import StatCard from '@/Components/StatCard.vue';
-import MonthlyBar from '@/Components/charts/MonthlyBar.vue';
-import CategoryDonut from '@/Components/charts/CategoryDonut.vue';
+import StatCard from '@/components/StatCard.vue';
+import MonthlyBar from '@/components/charts/MonthlyBar.vue';
+import CategoryDonut from '@/components/charts/CategoryDonut.vue';
 import { useCommunity } from '@/composables/useCommunity';
 
 const props = defineProps({

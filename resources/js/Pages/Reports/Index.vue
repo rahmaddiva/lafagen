@@ -12,7 +12,7 @@ import TableRow from '@/components/ui/table/TableRow.vue';
 import TableHead from '@/components/ui/table/TableHead.vue';
 import TableCell from '@/components/ui/table/TableCell.vue';
 import CommunityLayout from '@/Layouts/CommunityLayout.vue';
-import EmptyState from '@/Components/EmptyState.vue';
+import EmptyState from '@/components/EmptyState.vue';
 import { useCommunity } from '@/composables/useCommunity';
 
 const props = defineProps({
